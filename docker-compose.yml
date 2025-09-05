@@ -40,19 +40,6 @@ services:
     networks:
       - laravel
 
-  node:
-    image: node:20-alpine
-    working_dir: /var/www/html
-    volumes:
-      - .:/var/www/html
-    command: sh -c "npm install && npm run dev"
-    ports:
-      - "5173:5173"   # expose Vite dev server
-    depends_on:
-      - app
-    networks:
-      - laravel
-
 volumes:
   db_data:
 
