@@ -16,6 +16,7 @@ import type { BreadcrumbItem, NavItem } from '@/types';
 import { InertiaLinkProps, Link, usePage } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-vue-next';
 import { computed } from 'vue';
+import { trans } from '@/helpers/translator'
 
 interface Props {
     breadcrumbs?: BreadcrumbItem[];
@@ -37,18 +38,20 @@ const activeItemStyles = computed(
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dashboard',
+        title: trans('dashboard'),
         href: dashboard(),
         icon: LayoutGrid,
     },
 ];
 
 const rightNavItems: NavItem[] = [
+    /*
     {
         title: 'Repository',
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
     },
+    */
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#vue',
