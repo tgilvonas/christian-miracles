@@ -12,11 +12,11 @@ return new class extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'miracles_countries';
+    public $tableName = 'miracles_translations';
 
     /**
      * Run the migrations.
-     * @table miracles_countries
+     * @table miracles_translations
      *
      * @return void
      */
@@ -24,21 +24,22 @@ return new class extends Migration
     {
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->engine = 'InnoDB';
+            $table->increments('id');
+            $table->string('lang', 3);
+            $table->string('name');
+            $table->string('slug')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('meta_keywords')->nullable();
+            $table->longText('description');
             $table->unsignedInteger('miracle_id');
-            $table->unsignedInteger('country_id');
 
-            $table->index(["country_id"], 'fk_miracles_has_countries_countries1_idx');
+            $table->index(["miracle_id"], 'fk_miracles_translations_miracles1_idx');
+            $table->softDeletes();
+            $table->nullableTimestamps();
 
-            $table->index(["miracle_id"], 'fk_miracles_has_countries_miracles1_idx');
 
-
-            $table->foreign('miracle_id', 'fk_miracles_has_countries_miracles1_idx')
+            $table->foreign('miracle_id', 'fk_miracles_translations_miracles1_idx')
                 ->references('id')->on('miracles')
-                ->onDelete('no action')
-                ->onUpdate('no action');
-
-            $table->foreign('country_id', 'fk_miracles_has_countries_countries1_idx')
-                ->references('id')->on('countries')
                 ->onDelete('no action')
                 ->onUpdate('no action');
         });

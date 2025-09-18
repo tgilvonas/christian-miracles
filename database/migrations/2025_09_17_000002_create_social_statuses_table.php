@@ -12,11 +12,11 @@ return new class extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'countries_translations';
+    public $tableName = 'social_statuses';
 
     /**
      * Run the migrations.
-     * @table countries_translations
+     * @table social_statuses
      *
      * @return void
      */
@@ -25,11 +25,7 @@ return new class extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
-            $table->string('lang', 3);
-            $table->string('name');
-            $table->integer('country_id');
-
-            $table->index(["country_id"], 'fk_countries_translations_countries1_idx');
+            $table->string('name')->nullable();
             $table->softDeletes();
             $table->nullableTimestamps();
         });

@@ -12,11 +12,11 @@ return new class extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'persons_countries';
+    public $tableName = 'persons_social_statuses';
 
     /**
      * Run the migrations.
-     * @table persons_countries
+     * @table persons_social_statuses
      *
      * @return void
      */
@@ -24,16 +24,21 @@ return new class extends Migration
     {
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->engine = 'InnoDB';
-            $table->increments('person_id');
-            $table->integer('country_id');
+            $table->unsignedInteger('persons_id');
+            $table->unsignedInteger('social_statuses_id');
 
-            $table->index(["country_id"], 'fk_persons_has_countries_countries1_idx');
+            $table->index(["social_statuses_id"], 'fk_persons_has_social_statuses_social_statuses1_idx');
 
-            $table->index(["person_id"], 'fk_persons_has_countries_persons1_idx');
+            $table->index(["persons_id"], 'fk_persons_has_social_statuses_persons1_idx');
 
 
-            $table->foreign('person_id', 'fk_persons_has_countries_persons1_idx')
+            $table->foreign('persons_id', 'fk_persons_has_social_statuses_persons1_idx')
                 ->references('id')->on('persons')
+                ->onDelete('no action')
+                ->onUpdate('no action');
+
+            $table->foreign('social_statuses_id', 'fk_persons_has_social_statuses_social_statuses1_idx')
+                ->references('id')->on('social_statuses')
                 ->onDelete('no action')
                 ->onUpdate('no action');
         });

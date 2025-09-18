@@ -12,11 +12,11 @@ return new class extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'miracles_translations';
+    public $tableName = 'social_statuses_translations';
 
     /**
      * Run the migrations.
-     * @table miracles_translations
+     * @table social_statuses_translations
      *
      * @return void
      */
@@ -25,15 +25,23 @@ return new class extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
-            $table->string('lang', 3);
-            $table->string('name');
+            $table->string('lang', 3)->nullable();
+            $table->string('name')->nullable();
             $table->string('slug')->nullable();
-            $table->longText('description');
-            $table->integer('miracle_id');
+            $table->text('meta_keywords')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('description')->nullable();
+            $table->unsignedInteger('social_status_id');
 
-            $table->index(["miracle_id"], 'fk_miracles_translations_miracles1_idx');
+            $table->index(["social_status_id"], 'fk_social_statuses_translations_social_statuses1_idx');
             $table->softDeletes();
             $table->nullableTimestamps();
+
+
+            $table->foreign('social_status_id', 'fk_social_statuses_translations_social_statuses1_idx')
+                ->references('id')->on('social_statuses')
+                ->onDelete('no action')
+                ->onUpdate('no action');
         });
     }
 
