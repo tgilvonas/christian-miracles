@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'create' => 'Create',
+    'create_new' => 'Create new',
     'edit' => 'Edit',
     'delete' => 'Delete',
     'dashboard' => 'Dashboard',

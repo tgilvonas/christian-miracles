@@ -8,7 +8,7 @@ import { trans } from '@/helpers/translator'
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
+        title: trans('dashboard'),
         href: dashboard().url,
     },
 ];

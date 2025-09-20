@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'create' => 'Sukurti',
+    'create_new' => 'Sukurti naują',
     'edit' => 'Redaguoti',
     'delete' => 'Ištrinti',
     'dashboard' => 'Statistikos skydas',
