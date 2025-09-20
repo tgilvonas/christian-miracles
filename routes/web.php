@@ -13,7 +13,7 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/locations', [LocationsController::class, 'index'])->name('locations.index');
+    Route::get('/admin/locations', [LocationsController::class, 'index'])->name('admin.locations.index');
 });
 
 require __DIR__.'/settings.php';

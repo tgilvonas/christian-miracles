@@ -9,6 +9,7 @@ import { Link } from '@inertiajs/vue3';
 import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { trans } from '@/helpers/translator'
+import { route } from 'ziggy-js'
 
 const mainNavItems: NavItem[] = [
     {
@@ -18,7 +19,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: trans('locations'),
-        href: '/locations',
+        href: route('admin.locations.index'),
         icon: LayoutGrid,
     },
 ];
