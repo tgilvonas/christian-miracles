@@ -4,7 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Person extends Model
+class LocationTranslation extends Model
 {
+    protected $table = 'locations_translations';
+
     protected $guarded = ['id'];
 }
