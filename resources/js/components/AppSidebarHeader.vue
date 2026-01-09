@@ -3,6 +3,9 @@ import Breadcrumbs from '@/components/Breadcrumbs.vue';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 withDefaults(
     defineProps<{
@@ -25,7 +28,10 @@ withDefaults(
             </template>
         </div>
         <div class="flex items-center ml-auto gap-4 z-50">
-            <LocaleSwitcher />
+            <LocaleSwitcher
+                :locales="page.props.locales"
+                :current-locale="page.props.currentLocale"
+            />
         </div>
     </header>
 </template>

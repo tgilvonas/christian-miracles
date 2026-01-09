@@ -16,5 +16,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/locations', [LocationsController::class, 'index'])->name('admin.locations.index');
 });
 
+Route::post('/locale', function () {
+    $locale = request('locale');
+
+    if (array_key_exists($locale, config('app.website_locales'))) {
+        session(['locale' => $locale]);
+    }
+
+    return response()->noContent();
+});
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

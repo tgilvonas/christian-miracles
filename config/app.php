@@ -84,7 +84,10 @@ return [
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     'admin_locales' => ['lt', 'en'],
-    'website_locales' => ['lt', 'en'],
+    'website_locales' => [
+        'en' => 'EN',
+        'lt' => 'LT',
+    ],
 
     'admin_locale' => env('APP_LOCALE', 'lt'),
 

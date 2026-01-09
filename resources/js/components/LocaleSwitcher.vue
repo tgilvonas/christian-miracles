@@ -1,21 +1,29 @@
 <script setup>
 import { ref } from 'vue';
+import axios from 'axios';
+
+const props = defineProps({
+    locales: {
+        type: Object,
+        required: true,
+    },
+    currentLocale: {
+        type: String,
+        required: true,
+    },
+});
 
 const isOpen = ref(false);
-const currentLocale = ref('EN');
 
-const locales = [
-    { code: 'en', label: 'EN' },
-    { code: 'lt', label: 'LT' },
-];
+console.log(props.currentLocale);
 
-function switchLocale(locale) {
-    currentLocale.value = locale.label;
+function switchLocale(localeCode) {
     isOpen.value = false;
 
-    // 🔹 hook your real logic here
-    // e.g. i18n.global.locale.value = locale.code
-    // or axios.post('/locale', { locale: locale.code })
+    axios.post('/locale', { locale: localeCode })
+        .then(() => {
+            window.location.reload();
+        });
 }
 </script>
 
@@ -28,7 +36,9 @@ function switchLocale(locale) {
                    bg-white hover:bg-gray-100
                    dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700"
         >
-            <span class="font-medium">{{ currentLocale }}</span>
+            <span class="font-medium">
+                {{ locales[currentLocale] }}
+            </span>
             <svg
                 class="h-4 w-4 transition-transform"
                 :class="{ 'rotate-180': isOpen }"
@@ -41,19 +51,20 @@ function switchLocale(locale) {
             </svg>
         </button>
 
+        <!-- Dropdown -->
         <div
             v-if="isOpen"
             class="absolute right-0 mt-2 w-24 rounded-lg border bg-white shadow-lg
                    dark:bg-gray-800 dark:border-gray-700"
         >
             <button
-                v-for="locale in locales"
-                :key="locale.code"
-                @click="switchLocale(locale)"
-                class="block w-full px-3 py-2 text-sm text-left
+                v-for="(label, code) in locales"
+                :key="code"
+                @click="switchLocale(code)"
+                class="block w-full px-3 py-2 text-left text-sm
                        hover:bg-gray-100 dark:hover:bg-gray-700"
             >
-                {{ locale.label }}
+                {{ label }}
             </button>
         </div>
     </div>
