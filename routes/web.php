@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\LocationsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -8,25 +9,15 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
+Route::post('/locale', [LocaleController::class, 'setLocale'])->name('locale.set');
+Route::get('/get-locale', [LocaleController::class, 'getLocale'])->name('locale.get');
+
 Route::get('dashboard', function () {
     return Inertia::render('admin/Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/locations', [LocationsController::class, 'index'])->name('admin.locations.index');
-});
-
-Route::post('/locale', function () {
-    $locale = request('locale');
-    if (array_key_exists($locale, config('app.website_locales'))) {
-        session(['locale' => $locale]);
-    }
-    return response()->noContent();
-});
-Route::get('/get-locale', function () {
-    return [
-        'locale' => app()->getLocale(),
-    ];
 });
 
 require __DIR__.'/settings.php';
