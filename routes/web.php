@@ -18,12 +18,15 @@ Route::middleware('auth')->group(function () {
 
 Route::post('/locale', function () {
     $locale = request('locale');
-
     if (array_key_exists($locale, config('app.website_locales'))) {
         session(['locale' => $locale]);
     }
-
     return response()->noContent();
+});
+Route::get('/get-locale', function () {
+    return [
+        'locale' => app()->getLocale(),
+    ];
 });
 
 require __DIR__.'/settings.php';

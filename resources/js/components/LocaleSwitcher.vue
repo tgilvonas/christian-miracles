@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 const props = defineProps({
@@ -15,7 +15,7 @@ const props = defineProps({
 
 const isOpen = ref(false);
 
-console.log(props.currentLocale);
+const currentLocale = ref('en');
 
 function switchLocale(localeCode) {
     isOpen.value = false;
@@ -25,6 +25,13 @@ function switchLocale(localeCode) {
             window.location.reload();
         });
 }
+
+onMounted(() => {
+    axios.get('/get-locale').then((response) => {
+        currentLocale.value = response.data.locale;
+    });
+});
+
 </script>
 
 <template>
