@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Inertia\Inertia;
 
-class LocationsAdminController extends Controller
+class LocationsController extends Controller
 {
     public function index()
     {
