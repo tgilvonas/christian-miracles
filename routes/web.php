@@ -18,6 +18,7 @@ Route::get('dashboard', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/locations', [LocationsController::class, 'index'])->name('admin.locations.index');
+    Route::get('/admin/locations/json-list', [LocationsController::class, 'getJsonList'])->name('admin.locations.json_list');
 });
 
 require __DIR__.'/settings.php';
