@@ -12,11 +12,11 @@ return new class extends Migration
      * Schema table name to migrate
      * @var string
      */
-    public $tableName = 'persons_translations';
+    public $tableName = 'miracles_texts';
 
     /**
      * Run the migrations.
-     * @table persons_translations
+     * @table miracles_texts
      *
      * @return void
      */
@@ -25,23 +25,14 @@ return new class extends Migration
         Schema::create($this->tableName, function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->increments('id');
-            $table->string('lang', 3);
-            $table->string('name');
-            $table->string('slug')->nullable();
-            $table->text('meta_description')->nullable();
-            $table->text('meta_keywords')->nullable();
-            $table->text('biography');
-            $table->unsignedInteger('person_id');
-
-            $table->index(["person_id"], 'fk_persons_translations_persons1_idx');
+            $table->string('lang', 3)->nullable();
+            $table->integer('pos')->nullable();
+            $table->integer('miracle_id');
+            $table->string('image_orientation', 20)->nullable();
+            $table->tinyInteger('has_image')->nullable();
+            $table->longText('text')->nullable();
             $table->softDeletes();
             $table->nullableTimestamps();
-
-
-            $table->foreign('person_id', 'fk_persons_translations_persons1_idx')
-                ->references('id')->on('persons')
-                ->onDelete('no action')
-                ->onUpdate('no action');
         });
     }
 
