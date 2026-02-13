@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\LocationsController;
 use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\LocationsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
