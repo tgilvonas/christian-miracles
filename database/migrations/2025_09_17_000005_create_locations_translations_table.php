@@ -28,6 +28,8 @@ return new class extends Migration
             $table->string('lang', 3);
             $table->string('name');
             $table->string('slug')->nullable();
+            $table->text('meta_description')->nullable();
+            $table->text('meta_keywords')->nullable();
             $table->unsignedInteger('location_id');
 
             $table->index(["location_id"], 'fk_countries_translations_countries1_idx');
