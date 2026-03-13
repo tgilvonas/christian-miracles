@@ -7,4 +7,6 @@ return [
     'dashboard' => 'Dashboard',
     'locations' => 'Locations',
     'location' => 'Location',
+    'save' => 'Save',
+    'close' => 'Close',
 ];

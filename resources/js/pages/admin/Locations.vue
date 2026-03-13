@@ -10,6 +10,7 @@ import Button from '@/components/Button.vue';
 import FlashMessage from "@/components/FlashMessage.vue";
 import Modal from "@/components/Modal.vue";
 import state from '@/state.js';
+import LocationForm from "@/components/LocationForm.vue";
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -50,11 +51,15 @@ function getLocationsList(page: number) {
         <div class="p-3">
             <FlashMessage type="success"></FlashMessage>
             <FlashMessage type="error"></FlashMessage>
-            <Modal modal-name="location">
+            <Modal modal-name="location" size="lg">
                 <template #modal_title>
                     {{ trans('location') }}
                 </template>
-                <!-- TODO -->
+                <template #content>
+                    <div>
+                        <LocationForm :location="state.modals.location.objectInModal" />
+                    </div>
+                </template>
             </Modal>
             <Button @click="state.callModal({modal: 'location', objectInModal: {}})" color="green">
                 {{ trans('create_new') }}

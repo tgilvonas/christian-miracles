@@ -7,4 +7,6 @@ return [
     'dashboard' => 'Statistikos skydas',
     'locations' => 'Vietovės',
     'location' => 'Vietovė',
+    'save' => 'Išsaugoti',
+    'close' => 'Uždaryti',
 ];
