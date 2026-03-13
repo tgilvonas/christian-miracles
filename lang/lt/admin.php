@@ -5,5 +5,6 @@ return [
     'edit' => 'Redaguoti',
     'delete' => 'Ištrinti',
     'dashboard' => 'Statistikos skydas',
-    'locations' => 'Vietovės'
+    'locations' => 'Vietovės',
+    'location' => 'Vietovė',
 ];

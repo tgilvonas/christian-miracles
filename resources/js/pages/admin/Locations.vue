@@ -6,6 +6,10 @@ import { type BreadcrumbItem } from '@/types';
 import { route } from 'ziggy-js'
 import {ref, onMounted, onBeforeUnmount} from "vue";
 import axios from "axios";
+import Button from '@/components/Button.vue';
+import FlashMessage from "@/components/FlashMessage.vue";
+import Modal from "@/components/Modal.vue";
+import state from '@/state.js';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -44,7 +48,17 @@ function getLocationsList(page: number) {
     <Head :title="trans('locations')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
-            <button class="px-3 py-2 bg-green-600 text-white font-medium rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-300">+ {{ trans('create_new') }}</button>
+            <FlashMessage type="success"></FlashMessage>
+            <FlashMessage type="error"></FlashMessage>
+            <Modal modal-name="location">
+                <template #modal_title>
+                    {{ trans('location') }}
+                </template>
+                <!-- TODO -->
+            </Modal>
+            <Button @click="state.callModal({modal: 'location', objectInModal: {}})" color="green">
+                {{ trans('create_new') }}
+            </Button>
         </div>
     </AppLayout>
 </template>

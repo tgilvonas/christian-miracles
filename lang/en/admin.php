@@ -6,4 +6,5 @@ return [
     'delete' => 'Delete',
     'dashboard' => 'Dashboard',
     'locations' => 'Locations',
+    'location' => 'Location',
 ];
