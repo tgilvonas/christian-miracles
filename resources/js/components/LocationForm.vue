@@ -1,12 +1,16 @@
-<script setup lang="ts">
+<script setup>
 import Button from '@/components/Button.vue';
 import { Input } from '@/components/ui/input';
-import { trans } from '@/helpers/translator';
+import { trans } from '@/helpers/translator.ts';
+import { slugify } from '@/helpers/slugify';
 import {ref, reactive, onMounted} from "vue";
 import state from '@/state.js';
 import axios from "axios";
 import { route } from 'ziggy-js';
 import emitter from '@/eventBus.js';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const props = defineProps({
     location: {
@@ -17,6 +21,10 @@ const props = defineProps({
 
 const location = reactive({...props.location});
 const formIsValid = ref(true);
+
+onMounted(() => {
+    console.log(page.props.locales)
+});
 
 // @TODO: implement
 function saveLocation() {
