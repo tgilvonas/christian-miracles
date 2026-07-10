@@ -35,7 +35,35 @@ function loadLocationForm() {
 }
 
 function saveLocation() {
-    // @todo: implement persistence
+    const { translations, ...locationData } = location;
+    const payload = {
+        location: locationData,
+        translations: Object.fromEntries(
+            Object.entries(translations || {}).map(([locale, translation]) => [locale, { ...(translation || {}) }])
+        ),
+    };
+
+    isLoading.value = true;
+
+    const saveUrl = state.modals.location.objectId
+        ? route('admin.locations.save', { locationId: state.modals.location.objectId })
+        : route('admin.locations.save');
+
+    axios.post(saveUrl, payload)
+        .then((response) => {
+            state.flashSuccessMessage({
+                message: response.data.message || 'Location saved successfully.',
+            });
+            state.hideModal({ modal: 'location' });
+        })
+        .catch((error) => {
+            state.flashErrorMessage({
+                message: error.response?.data?.message || 'Unable to save location.',
+            });
+        })
+        .finally(() => {
+            isLoading.value = false;
+        });
 }
 </script>
 

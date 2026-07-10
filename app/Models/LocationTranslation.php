@@ -9,4 +9,9 @@ class LocationTranslation extends Model
     protected $table = 'locations_translations';
 
     protected $guarded = ['id'];
+
+    public function location()
+    {
+        return $this->belongsTo(Location::class);
+    }
 }

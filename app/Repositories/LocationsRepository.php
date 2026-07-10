@@ -19,11 +19,12 @@ class LocationsRepository
             $tableAliases[] = $tableAlias;
 
             foreach ($fields as $field) {
-                $fieldsToSelect[] = $tableAlias . '.' . $field . ' AS ' . $field . '_' . $locale;
+                $fieldsToSelect[] = $tableAlias . '.' . $field . ' AS ' . $field . '_' . strtolower($locale);
             }
         }
 
-        $queryObject = Location::query()->selectRaw('locations.id, ' . implode($fieldsToSelect));
+        $queryObject = Location::query()->selectRaw('locations.id, ' . implode(', ', $fieldsToSelect));
+
 
         foreach ($tableAliases as $tableAlias) {
             $queryObject->leftJoin('locations_translations AS ' . $tableAlias, 'locations.id', '=', $tableAlias . '.location_id');
@@ -31,11 +32,11 @@ class LocationsRepository
 
         if (strlen($searchText)>2) {
             foreach ($locales as $locale) {
-                $queryObject->orWhere('name_' . $locale, 'LIKE', '%' . $searchText . '%');
+                $queryObject->orWhere('name_' . strtolower($locale), 'LIKE', '%' . $searchText . '%');
             }
         }
 
-        $queryObject->orderBy('name_' . $currentLocale);
+        $queryObject->orderBy('name_' . strtolower($currentLocale));
 
         if (is_numeric($paginateBy)) {
             return $queryObject->paginate($paginateBy);

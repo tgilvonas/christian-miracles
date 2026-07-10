@@ -12,4 +12,6 @@ return [
     'title' => 'Title',
     'slug' => 'Slug',
     'loading' => 'Loading...',
+    'saved' => 'saved',
+    'successfully' => 'successfully'
 ];

@@ -12,4 +12,6 @@ return [
     'title' => 'Pavadinimas',
     'slug' => 'URL',
     'loading' => 'Kraunama...',
+    'saved' => 'išsaugota',
+    'successfully' => 'sėkmingai'
 ];
