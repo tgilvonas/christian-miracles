@@ -2,7 +2,7 @@
 import Button from '@/components/Button.vue';
 import Tabs from '@/components/Tabs.vue';
 import { trans } from '@/helpers/translator.ts';
-import { onMounted, reactive, ref } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import state from '@/state.js';
 import axios from 'axios';
 import { route } from 'ziggy-js';
@@ -14,17 +14,32 @@ const location = reactive({
 const formIsValid = ref(true);
 const isLoading = ref(false);
 
-onMounted(() => {
-    if (state.modals.location.objectId === null) {
+watch(
+    () => state.modals.location.objectId,
+    () => {
+        if (!state.modals.location.show) {
+            return;
+        }
+
         loadLocationForm();
-    }
-});
+    },
+    { immediate: true }
+);
 
 function loadLocationForm() {
     isLoading.value = true;
 
-    axios.get(route('admin.locations.create'))
+    const objectId = state.modals.location.objectId;
+    const requestUrl = objectId
+        ? route('admin.locations.edit', { locationId: objectId })
+        : route('admin.locations.create');
+
+    axios.get(requestUrl)
         .then((response) => {
+            Object.keys(location).forEach((key) => {
+                delete location[key];
+            });
+
             Object.assign(location, response.data.location ?? {}, {
                 translations: response.data.translations ?? {},
             });

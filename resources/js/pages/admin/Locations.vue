@@ -105,7 +105,9 @@ function openCreateLocationModal() {
                                 <td class="border border-gray-300 dark:border-gray-600 px-3 py-2">{{ getLocationValue(location, 'name_') }}</td>
                                 <td class="border border-gray-300 dark:border-gray-600 px-3 py-2">{{ getLocationValue(location, 'slug_') }}</td>
                                 <td class="border border-gray-300 dark:border-gray-600 px-3 py-2">
-                                    
+                                    <Button @click="state.callModal({ modal: 'location', objectId: location.id })" color="blue" size="sm">
+                                        {{ trans('edit') }} 
+                                    </Button>
                                 </td>
                             </tr>
                         </tbody>

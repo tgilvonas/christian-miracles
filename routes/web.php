@@ -21,6 +21,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/locations/json-list', [LocationsController::class, 'getJsonList'])->name('admin.locations.json_list');
     Route::get('/admin/locations/create', [LocationsController::class, 'create'])->name('admin.locations.create');
     Route::post('/admin/locations/{locationId?}', [LocationsController::class, 'save'])->name('admin.locations.save');
+    Route::get('/admin/locations/{locationId}/edit', [LocationsController::class, 'edit'])->name('admin.locations.edit');
 
 });
 

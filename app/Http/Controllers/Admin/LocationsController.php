@@ -84,4 +84,28 @@ class LocationsController extends Controller
             'location' => $location,
         ]);
     }
+
+    public function edit($locationId)
+    {
+        $location = Location::findOrFail($locationId);
+
+        $translations = [];
+        foreach (config('app.website_locales') as $key => $locale) {
+            $translation = LocationTranslation::where('location_id', $location->id)
+                ->where('lang', $key)
+                ->first();
+
+            if (!$translation) {
+                $translation = new LocationTranslation();
+                $translation->lang = $key;
+            }
+
+            $translations[$key] = $translation;
+        }
+
+        return [
+            'location' => $location,
+            'translations' => $translations,
+        ];
+    }
 }
