@@ -23,11 +23,13 @@ class LocationsRepository
             }
         }
 
-        $queryObject = Location::query()->selectRaw('locations.id, ' . implode(', ', $fieldsToSelect));
-
-
+        $queryObject = Location::query()->selectRaw('locations.id, ' . implode(', ', $fieldsToSelect))->distinct();
+        
         foreach ($tableAliases as $tableAlias) {
-            $queryObject->leftJoin('locations_translations AS ' . $tableAlias, 'locations.id', '=', $tableAlias . '.location_id');
+            $queryObject->leftJoin('locations_translations AS ' . $tableAlias, function ($join) use ($tableAlias) {
+                $join->on('locations.id', '=', $tableAlias . '.location_id')
+                    ->where($tableAlias . '.lang', '=', strtoupper(str_replace('translations_', '', $tableAlias)));
+            });
         }
 
         if (strlen($searchText)>2) {

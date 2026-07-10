@@ -13,5 +13,7 @@ return [
     'slug' => 'Slug',
     'loading' => 'Loading...',
     'saved' => 'saved',
-    'successfully' => 'successfully'
+    'successfully' => 'successfully',
+    'actions' => 'Actions',
+    'no_records_found' => 'No records found',
 ];

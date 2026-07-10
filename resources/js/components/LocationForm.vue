@@ -6,6 +6,7 @@ import { onMounted, reactive, ref } from 'vue';
 import state from '@/state.js';
 import axios from 'axios';
 import { route } from 'ziggy-js';
+import eventBus from '@/eventBus.js';
 
 const location = reactive({
     translations: {},
@@ -54,6 +55,7 @@ function saveLocation() {
             state.flashSuccessMessage({
                 message: response.data.message || 'Location saved successfully.',
             });
+            eventBus.emit('locationSaved');
             state.hideModal({ modal: 'location' });
         })
         .catch((error) => {

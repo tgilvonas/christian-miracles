@@ -13,5 +13,7 @@ return [
     'slug' => 'URL',
     'loading' => 'Kraunama...',
     'saved' => 'išsaugota',
-    'successfully' => 'sėkmingai'
+    'successfully' => 'sėkmingai',
+    'actions' => 'Veiksmai',
+    'no_records_found' => 'Įrašų nerasta',
 ];
