@@ -108,4 +108,19 @@ class LocationsController extends Controller
             'translations' => $translations,
         ];
     }
+
+    public function delete($locationId)
+    {
+        $location = Location::findOrFail($locationId);
+        
+        foreach ($location->translations as $translation) {
+            $translation->delete();
+        }
+        
+        $location->delete();
+
+        return response()->json([
+            'message' => __('admin.location') . ' ' . __('admin.deleted') . ' ' . __('admin.successfully'),
+        ]);
+    }
 }

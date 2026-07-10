@@ -22,7 +22,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/locations/create', [LocationsController::class, 'create'])->name('admin.locations.create');
     Route::post('/admin/locations/{locationId?}', [LocationsController::class, 'save'])->name('admin.locations.save');
     Route::get('/admin/locations/{locationId}/edit', [LocationsController::class, 'edit'])->name('admin.locations.edit');
-
+    Route::delete('/admin/locations/{locationId}', [LocationsController::class, 'delete'])->name('admin.locations.delete');
 });
 
 require __DIR__.'/settings.php';
