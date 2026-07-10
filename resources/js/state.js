@@ -1,28 +1,16 @@
 import { reactive } from 'vue';
 
-const modals= reactive({
-    miracle: {
-        zIndex: 3100,
-        show: false,
-        objectInModal: null,
-        modalContentLoaded: false
-    },
-    saint: {
-        zIndex: 3200,
-        show: false,
-        objectInModal: null,
-        modalContentLoaded: false
-    },
+const modals = reactive({
     location: {
         zIndex: 3300,
         show: false,
-        objectInModal: null,
+        objectId: null,
         modalContentLoaded: false
     },
     socialStatus: {
         zIndex: 3400,
         show: false,
-        objectInModal: null,
+        objectId: null,
         modalContentLoaded: false
     }
 });
@@ -43,13 +31,14 @@ export default {
     messages: messages,
     savedObject: reactive({}),
     callModal (data) {
-        modals[data.modal]['show'] = true;
-        modals[data.modal]['objectInModal'] = data.objectInModal;
+        modals[data.modal].show = true;
+        modals[data.modal].objectId = data.objectId;
+        modals[data.modal].modalContentLoaded = false;
     },
     hideModal (data) {
-        modals[data.modal]['show'] = false;
-        modals[data.modal]['modalContentLoaded'] = false;
-        modals[data.modal]['objectInModal'] = false;
+        modals[data.modal].show = false;
+        modals[data.modal].modalContentLoaded = false;
+        modals[data.modal].objectId = false;
     },
     flashSuccessMessage (data) {
         messages.success.messageString = data.message;

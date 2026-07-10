@@ -4,13 +4,13 @@ import { Head } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator'
 import { type BreadcrumbItem } from '@/types';
 import { route } from 'ziggy-js'
-import {ref, onMounted, onBeforeUnmount} from "vue";
-import axios from "axios";
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import axios from 'axios';
 import Button from '@/components/Button.vue';
-import FlashMessage from "@/components/FlashMessage.vue";
-import Modal from "@/components/Modal.vue";
+import FlashMessage from '@/components/FlashMessage.vue';
+import Modal from '@/components/Modal.vue';
 import state from '@/state.js';
-import LocationForm from "@/components/LocationForm.vue";
+import LocationForm from '@/components/LocationForm.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,12 +37,15 @@ function getLocationsList(page: number) {
         params: {
             paginate_by: 10
         }
-    }).then(function(response){
+    }).then(function(response) {
         loading.value = false;
         // @todo
     })
 }
 
+function openCreateLocationModal() {
+    state.callModal({ modal: 'location', objectId: null });
+}
 </script>
 
 <template>
@@ -51,17 +54,17 @@ function getLocationsList(page: number) {
         <div class="p-3">
             <FlashMessage type="success"></FlashMessage>
             <FlashMessage type="error"></FlashMessage>
-            <Modal modal-name="location" size="lg">
+            <Modal modal-name="location">
                 <template #modal_title>
                     {{ trans('location') }}
                 </template>
                 <template #content>
                     <div>
-                        <LocationForm :location="state.modals.location.objectInModal" />
+                        <LocationForm />
                     </div>
                 </template>
             </Modal>
-            <Button @click="state.callModal({modal: 'location', objectInModal: {}})" color="green">
+            <Button @click="openCreateLocationModal" color="green">
                 {{ trans('create_new') }}
             </Button>
         </div>

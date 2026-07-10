@@ -1,41 +1,68 @@
 <script setup>
 import Button from '@/components/Button.vue';
-import { Input } from '@/components/ui/input';
+import Tabs from '@/components/Tabs.vue';
 import { trans } from '@/helpers/translator.ts';
-import { slugify } from '@/helpers/slugify';
-import {ref, reactive, onMounted} from "vue";
+import { onMounted, reactive, ref } from 'vue';
 import state from '@/state.js';
-import axios from "axios";
+import axios from 'axios';
 import { route } from 'ziggy-js';
-import emitter from '@/eventBus.js';
-import { usePage } from '@inertiajs/vue3';
 
-const page = usePage();
+const location = reactive({
+    translations: {},
+});
+const formIsValid = ref(true);
+const isLoading = ref(false);
 
-const props = defineProps({
-    location: {
-        type: Object,
-        default: null
+onMounted(() => {
+    if (state.modals.location.objectId === null) {
+        loadLocationForm();
     }
 });
 
-const location = reactive({...props.location});
-const formIsValid = ref(true);
+function loadLocationForm() {
+    isLoading.value = true;
 
-onMounted(() => {
-    console.log(page.props.locales)
-});
-
-// @TODO: implement
-function saveLocation() {
-
+    axios.get(route('admin.locations.create'))
+        .then((response) => {
+            Object.assign(location, response.data.location ?? {}, {
+                translations: response.data.translations ?? {},
+            });
+            state.modals.location.modalContentLoaded = true;
+        })
+        .finally(() => {
+            isLoading.value = false;
+        });
 }
 
+function saveLocation() {
+    // @todo: implement persistence
+}
 </script>
 
 <template>
     <div class="pt-1">
         <div class="space-y-5">
+            <div v-if="isLoading" class="text-sm text-gray-500">
+                Loading...
+            </div>
+
+            <Tabs v-else>
+                <template #default="{ activeTab }">
+                    <template v-if="location.translations && location.translations[activeTab]">
+                        <input
+                            v-model="location.translations[activeTab].title"
+                            placeholder="Title"
+                            class="border p-2 w-full mb-2"
+                        />
+
+                        <input
+                            v-model="location.translations[activeTab].slug"
+                            placeholder="Slug"
+                            class="border p-2 w-full"
+                        />
+                    </template>
+                </template>
+            </Tabs>
 
             <div class="mt-8 flex justify-end space-x-3 border-t border-gray-200 dark:border-gray-700 pt-4">
                 <Button
