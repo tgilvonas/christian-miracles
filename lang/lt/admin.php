@@ -9,4 +9,7 @@ return [
     'location' => 'Vietovė',
     'save' => 'Išsaugoti',
     'close' => 'Uždaryti',
+    'title' => 'Pavadinimas',
+    'slug' => 'URL',
+    'loading' => 'Kraunama...',
 ];

@@ -9,4 +9,7 @@ return [
     'location' => 'Location',
     'save' => 'Save',
     'close' => 'Close',
+    'title' => 'Title',
+    'slug' => 'Slug',
+    'loading' => 'Loading...',
 ];

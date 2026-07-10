@@ -43,23 +43,57 @@ function saveLocation() {
     <div class="pt-1">
         <div class="space-y-5">
             <div v-if="isLoading" class="text-sm text-gray-500">
-                Loading...
+                {{ trans('loading') }}
             </div>
 
             <Tabs v-else>
                 <template #default="{ activeTab }">
                     <template v-if="location.translations && location.translations[activeTab]">
-                        <input
-                            v-model="location.translations[activeTab].title"
-                            placeholder="Title"
-                            class="border p-2 w-full mb-2"
-                        />
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                {{ trans('title') }}
+                            </label>
+                            <input
+                                v-model="location.translations[activeTab].name"
+                                :placeholder="trans('title')"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
+                            />
+                        </div>
 
-                        <input
-                            v-model="location.translations[activeTab].slug"
-                            placeholder="Slug"
-                            class="border p-2 w-full"
-                        />
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                {{ trans('slug') }}
+                            </label>
+                            <input
+                                v-model="location.translations[activeTab].slug"
+                                :placeholder="trans('slug')"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
+                            />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                Meta Description
+                            </label>
+                            <textarea
+                                v-model="location.translations[activeTab].meta_description"
+                                placeholder="Meta Description"
+                                rows="3"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
+                            />
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+                                Meta Keywords
+                            </label>
+                            <textarea
+                                v-model="location.translations[activeTab].meta_keywords"
+                                placeholder="Meta Keywords"
+                                rows="3"
+                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
+                            />
+                        </div>
                     </template>
                 </template>
             </Tabs>
