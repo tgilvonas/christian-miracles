@@ -80,7 +80,7 @@ class LocationsController extends Controller
         });
 
         return response()->json([
-            'message' => __('admin.location') . ' ' . __('admin.saved') . ' ' . __('admin.successfully'),
+            'message' => __('admin.record_saved_successfully'),
             'location' => $location,
         ]);
     }
@@ -120,7 +120,7 @@ class LocationsController extends Controller
         $location->delete();
 
         return response()->json([
-            'message' => __('admin.location') . ' ' . __('admin.deleted') . ' ' . __('admin.successfully'),
+            'message' => __('admin.record_deleted_successfully'),
         ]);
     }
 }
