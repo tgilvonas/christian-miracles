@@ -3,12 +3,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
 import { type BreadcrumbItem } from '@/types';
-import { route } from 'ziggy-js'
+import { route } from 'ziggy-js';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import axios from 'axios';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Modal from '@/components/Modal.vue';
+import DeleteDialog from "@/components/DeleteDialog.vue";
 import state from '@/state.js';
 import LocationForm from '@/components/LocationForm.vue';
 import eventBus from '@/eventBus.js';
@@ -29,12 +30,23 @@ const refreshLocations = () => {
     getLocations();
 };
 
+function getDeleteUrl() {
+    const deleteTarget = (state.modals.objectToDelete as Record<string, any>)?.objectInModal as Record<string, any> | null;
+    const locationId = deleteTarget?.id;
+
+    return locationId
+        ? route('admin.locations.delete', { locationId }).toString()
+        : '';
+}
+
 onMounted(() => {
     getLocations();
     eventBus.on('locationSaved', refreshLocations);
+    eventBus.on('objectDeleted', refreshLocations);
 });
 onBeforeUnmount(() => {
     eventBus.off('locationSaved', refreshLocations);
+    eventBus.off('objectDeleted', refreshLocations);
 });
 
 function getLocations(page: number = 1) {
@@ -71,6 +83,7 @@ function openCreateLocationModal() {
         <div class="p-3">
             <FlashMessage type="success"></FlashMessage>
             <FlashMessage type="error"></FlashMessage>
+
             <Modal modal-name="location">
                 <template #modal_title>
                     {{ trans('location') }}
@@ -81,6 +94,17 @@ function openCreateLocationModal() {
                     </div>
                 </template>
             </Modal>
+            <Modal modal-name="objectToDelete">
+                <template #modal_title>
+                    {{ trans('delete_record') }}
+                </template>
+                <template #content>
+                    <div>
+                        <DeleteDialog :delete-url="getDeleteUrl()" />
+                    </div>
+                </template>
+            </Modal>
+
             <Button @click="openCreateLocationModal" color="green">
                 {{ trans('create_new') }}
             </Button>
@@ -106,7 +130,10 @@ function openCreateLocationModal() {
                                 <td class="border border-gray-300 dark:border-gray-600 px-3 py-2">{{ getLocationValue(location, 'slug_') }}</td>
                                 <td class="border border-gray-300 dark:border-gray-600 px-3 py-2">
                                     <Button @click="state.callModal({ modal: 'location', objectId: location.id })" color="blue" size="sm">
-                                        {{ trans('edit') }} 
+                                        {{ trans('edit') }}
+                                    </Button>
+                                    <Button @click="state.callModal({ modal: 'objectToDelete', objectId: location.id, objectInModal: location })" color="red" size="sm">
+                                        {{ trans('delete') }}
                                     </Button>
                                 </td>
                             </tr>

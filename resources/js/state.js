@@ -12,6 +12,12 @@ const modals = reactive({
         show: false,
         objectId: null,
         modalContentLoaded: false
+    },
+    objectToDelete: {
+        zIndex: 5000,
+        show: false,
+        objectInModal: null,
+        modalContentLoaded: false
     }
 });
 
@@ -31,14 +37,26 @@ export default {
     messages: messages,
     savedObject: reactive({}),
     callModal (data) {
-        modals[data.modal].show = true;
-        modals[data.modal].objectId = data.objectId;
-        modals[data.modal].modalContentLoaded = false;
+        const targetModal = modals[data.modal];
+        if (!targetModal) {
+            return;
+        }
+
+        targetModal.show = true;
+        targetModal.objectId = data.objectId ?? null;
+        targetModal.modalContentLoaded = false;
+        targetModal.objectInModal = data.objectInModal ?? null;
     },
     hideModal (data) {
-        modals[data.modal].show = false;
-        modals[data.modal].modalContentLoaded = false;
-        modals[data.modal].objectId = false;
+        const targetModal = modals[data.modal];
+        if (!targetModal) {
+            return;
+        }
+
+        targetModal.show = false;
+        targetModal.modalContentLoaded = false;
+        targetModal.objectId = false;
+        targetModal.objectInModal = null;
     },
     flashSuccessMessage (data) {
         messages.success.messageString = data.message;
