@@ -12,4 +12,9 @@ class Location extends Model
     {
         return $this->hasMany(LocationTranslation::class);
     }
+
+    public function miracles()
+    {
+        return $this->belongsToMany(Miracle::class, 'miracles_locations', 'location_id', 'miracle_id');
+    }
 }
