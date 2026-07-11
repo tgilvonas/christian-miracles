@@ -26,6 +26,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/locations/{locationId}', [LocationsController::class, 'delete'])->name('admin.locations.delete');
 
     Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
+    Route::get('/admin/miracles/{miracleId}/edit', [MiraclesController::class, 'edit'])->name('admin.miracles.edit');
+    
 });
 
 require __DIR__.'/settings.php';
