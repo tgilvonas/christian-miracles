@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\LocationsController;
+use App\Http\Controllers\Admin\MiraclesController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/locations/{locationId?}', [LocationsController::class, 'save'])->name('admin.locations.save');
     Route::get('/admin/locations/{locationId}/edit', [LocationsController::class, 'edit'])->name('admin.locations.edit');
     Route::delete('/admin/locations/{locationId}', [LocationsController::class, 'delete'])->name('admin.locations.delete');
+
+    Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
 });
 
 require __DIR__.'/settings.php';

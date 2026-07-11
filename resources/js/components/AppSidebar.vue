@@ -18,6 +18,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: trans('miracles'),
+        href: route('admin.miracles.index'),
+        icon: LayoutGrid,
+    },
+    {
         title: trans('locations'),
         href: route('admin.locations.index'),
         icon: LayoutGrid,
@@ -31,12 +36,12 @@ const footerNavItems: NavItem[] = [
         href: 'https://github.com/laravel/vue-starter-kit',
         icon: Folder,
     },
-    */
     {
         title: 'Documentation',
         href: 'https://laravel.com/docs/starter-kits#vue',
         icon: BookOpen,
     },
+     */
 ];
 </script>
 
