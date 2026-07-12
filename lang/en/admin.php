@@ -25,4 +25,8 @@ return [
     'at_holy_mass' => 'At Holy Mass',
     'name' => 'Name',
     'description' => 'Description',
+    'texts' => 'Texts',
+    'add' => '+ Add',
+    'remove' => 'Remove',
+    'position' => 'Position',
 ];

@@ -29,6 +29,8 @@
         "vue-tsc": "^2.2.4"
     },
     "dependencies": {
+        "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+        "@ckeditor/ckeditor5-vue": "^8.1.1",
         "@inertiajs/vue3": "^2.1.0",
         "@vueuse/core": "^12.8.2",
         "axios": "^1.13.5",

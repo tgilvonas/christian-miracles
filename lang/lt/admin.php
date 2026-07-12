@@ -25,4 +25,6 @@ return [
     'at_holy_mass' => 'Per Šv. Mišias',
     'name' => 'Pavadinimas',
     'description' => 'Aprašymas',
+    'texts' => 'Tekstai',
+    'add' => '+ Pridėti',
 ];
