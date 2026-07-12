@@ -20,4 +20,9 @@ return [
     'are_you_sure_you_want_to_delete_this_record_2' => 'Ar tikrai norite ištrinti šį įrašą',
     'cancel' => 'Atšaukti',
     'miracles' => 'Stebuklai',
+    'happened_at' => 'Įvyko',
+    'published' => 'Paskelbtas',
+    'at_holy_mass' => 'Per Šv. Mišias',
+    'name' => 'Pavadinimas',
+    'description' => 'Aprašymas',
 ];

@@ -4,6 +4,11 @@ import { Head } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
 import { type BreadcrumbItem } from '@/types';
 import { route } from 'ziggy-js';
+import Button from '@/components/Button.vue';
+
+const createNewRoute = route('admin.miracles.edit', {
+    miracleId: 'new',
+});
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,7 +23,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head :title="trans('miracles')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
-            <div>To be developed here</div>
+            <Button :href="createNewRoute" class="mb-4" color="green">
+                {{ trans('create_new') }}
+            </Button>
         </div>
     </AppLayout>
 </template>
