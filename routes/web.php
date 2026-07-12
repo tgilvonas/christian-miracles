@@ -27,7 +27,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
     Route::get('/admin/miracles/{miracleId}/edit', [MiraclesController::class, 'edit'])->name('admin.miracles.edit');
-    
+    Route::post('/admin/miracles/{miracleId?}/save', [MiraclesController::class, 'save'])->name('admin.miracles.save');
 });
 
 require __DIR__.'/settings.php';
