@@ -27,4 +27,6 @@ return [
     'description' => 'Aprašymas',
     'texts' => 'Tekstai',
     'add' => '+ Pridėti',
+    'remove' => 'Pašalinti',
+    'position' => 'Pozicija',
 ];
