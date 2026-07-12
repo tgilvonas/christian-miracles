@@ -2,7 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import Tabs from '@/components/Tabs.vue';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
 import { type BreadcrumbItem } from '@/types';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -168,6 +168,17 @@ watch(
 
 watch(localeEntries, syncForm, { deep: true, immediate: true });
 
+function submit() {
+    const saveRoute = props.miracle?.id
+        ? route('admin.miracles.save', { miracleId: props.miracle.id })
+        : route('admin.miracles.save');
+
+    router.post(saveRoute, form, {
+        preserveScroll: true,
+        preserveState: false,
+    });
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: trans('miracles'),
@@ -181,7 +192,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
-                <div class="space-y-6">
+                <form class="space-y-6" @submit.prevent="submit">
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
@@ -344,11 +355,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <Button :href="route('admin.miracles.index')" type="button" color="gray">
                             {{ trans('cancel') }}
                         </Button>
-                        <Button type="button" color="blue">
+                        <Button type="submit" color="blue">
                             {{ trans('save') }}
                         </Button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </AppLayout>
