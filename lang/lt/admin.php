@@ -29,4 +29,5 @@ return [
     'add' => '+ Pridėti',
     'remove' => 'Pašalinti',
     'position' => 'Pozicija',
+    'block' => 'Blokas',
 ];

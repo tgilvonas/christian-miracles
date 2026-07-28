@@ -29,4 +29,5 @@ return [
     'add' => '+ Add',
     'remove' => 'Remove',
     'position' => 'Position',
+    'block' => 'Block',
 ];

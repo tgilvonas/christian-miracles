@@ -31,17 +31,17 @@ function changeTab(locale) {
     <div>
         <div class="border-b border-gray-200 dark:border-gray-700 mb-4">
             <nav class="flex gap-4">
-                <button
+                <span
                     v-for="[localeCode, localeLabel] in localeEntries"
                     :key="localeCode"
                     @click="changeTab(localeCode)"
                     class="px-4 py-2 text-sm font-medium border-b-2 transition-colors"
                     :class="activeTab === localeCode
-                        ? 'border-blue-600 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                        ? 'border-blue-600 text-blue-600 cursor-pointer'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 cursor-pointer dark:text-gray-400 dark:hover:text-gray-300'"
                 >
                     {{ localeLabel }}
-                </button>
+                </span>
             </nav>
         </div>
 
