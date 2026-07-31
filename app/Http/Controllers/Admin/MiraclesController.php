@@ -39,11 +39,8 @@ class MiraclesController extends Controller
         $miraclePayload = [
             'happened_at' => $request->input('happened_at'),
             'published' => (int) (bool) $request->input('published'),
+            'at_holy_mass' => (int) (bool) $request->input('at_holy_mass', false),
         ];
-
-        if (Schema::hasColumn('miracles', 'at_holy_mass')) {
-            $miraclePayload['at_holy_mass'] = (int) (bool) $request->input('at_holy_mass');
-        }
 
         $translationsData = $request->input('translations', []);
         $textsData = $request->input('texts', []);
@@ -106,8 +103,6 @@ class MiraclesController extends Controller
                         'lang' => $locale,
                         'pos' => $position,
                         'miracle_id' => $miracle->id,
-                        'image_orientation' => $item['image_orientation'] ?? null,
-                        'has_image' => isset($item['has_image']) ? (int) (bool) $item['has_image'] : null,
                         'text' => $item['text'] ?? null,
                     ];
 
