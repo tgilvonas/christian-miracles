@@ -7,6 +7,12 @@ const modals = reactive({
         objectId: null,
         modalContentLoaded: false
     },
+    user: {
+        zIndex: 3350,
+        show: false,
+        objectId: null,
+        modalContentLoaded: false
+    },
     socialStatus: {
         zIndex: 3400,
         show: false,

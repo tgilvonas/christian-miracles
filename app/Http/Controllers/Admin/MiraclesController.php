@@ -8,7 +8,6 @@ use App\Models\MiracleText;
 use App\Models\MiracleTranslation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Inertia\Inertia;
 
 class MiraclesController extends Controller

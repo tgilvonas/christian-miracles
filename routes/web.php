@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\LocationsController;
 use App\Http\Controllers\Admin\MiraclesController;
+use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -28,6 +29,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
     Route::get('/admin/miracles/{miracleId}/edit', [MiraclesController::class, 'edit'])->name('admin.miracles.edit');
     Route::post('/admin/miracles/{miracleId?}/save', [MiraclesController::class, 'save'])->name('admin.miracles.save');
+
+    Route::get('/admin/users', [UsersController::class, 'index'])->name('admin.users.index');
+    Route::get('/admin/users/json-list', [UsersController::class, 'jsonList'])->name('admin.users.json_list');
+    Route::post('/admin/users/{userId?}', [UsersController::class, 'save'])->name('admin.users.save');
+    Route::get('/admin/users/{userId}/edit', [UsersController::class, 'edit'])->name('admin.users.edit');
+    Route::delete('/admin/users/{userId}', [UsersController::class, 'delete'])->name('admin.users.delete');
 });
 
 require __DIR__.'/settings.php';

@@ -5,11 +5,16 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { LayoutGrid, Users } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 import { trans } from '@/helpers/translator'
 import { route } from 'ziggy-js'
+import { computed } from 'vue';
+
+const page = usePage();
+const currentUser = computed(() => (page.props.auth as { user?: { roles?: string[] } }).user ?? undefined);
+const canManageUsers = computed(() => (currentUser.value?.roles ?? []).includes('ROLE_SUPERADMIN'));
 
 const mainNavItems: NavItem[] = [
     {
@@ -28,6 +33,20 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
 ];
+
+const visibleMainNavItems = computed<NavItem[]>(() => {
+    const items = [...mainNavItems];
+
+    if (canManageUsers.value) {
+        items.push({
+            title: trans('users'),
+            href: route('admin.users.index'),
+            icon: Users,
+        });
+    }
+
+    return items;
+});
 
 const footerNavItems: NavItem[] = [
     /*
@@ -60,7 +79,7 @@ const footerNavItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="visibleMainNavItems" />
         </SidebarContent>
 
         <SidebarFooter>
