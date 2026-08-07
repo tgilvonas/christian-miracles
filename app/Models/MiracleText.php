@@ -3,12 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class MiracleText extends Model
+class MiracleText extends Model implements HasMedia
 {
-    protected $table = 'miracles_texts';
+    use InteractsWithMedia;
 
     protected $guarded = ['id'];
+
+    protected $table = 'miracles_texts';
 
     public function miracle()
     {
