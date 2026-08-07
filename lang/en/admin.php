@@ -34,4 +34,6 @@ return [
     'remove' => 'Remove',
     'position' => 'Position',
     'block' => 'Block',
+    'year_to' => 'Year to',
+    'info_source' => 'Info source',
 ];

@@ -37,6 +37,7 @@ class MiraclesController extends Controller
     {
         $miraclePayload = [
             'happened_at' => $request->input('happened_at'),
+            'year_to' => $request->input('year_to', null),
             'published' => (int) (bool) $request->input('published'),
             'at_holy_mass' => (int) (bool) $request->input('at_holy_mass', false),
         ];
@@ -102,7 +103,9 @@ class MiraclesController extends Controller
                         'lang' => $locale,
                         'pos' => $position,
                         'miracle_id' => $miracle->id,
+                        'title' => $item['title'] ?? null,
                         'text' => $item['text'] ?? null,
+                        'info_source' => $item['info_source'] ?? null,
                     ];
 
                     $textRecord = $existingTexts->firstWhere('pos', $position);

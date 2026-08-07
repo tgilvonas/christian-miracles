@@ -35,7 +35,7 @@ return new class extends Migration
             $table->string('image_alt', 255)->nullable();
             $table->string('title', 255)->nullable();
             $table->longText('text')->nullable();
-            $table->text('citation')->nullable();
+            $table->text('info_source')->nullable();
             $table->softDeletes();
             $table->nullableTimestamps();
         });

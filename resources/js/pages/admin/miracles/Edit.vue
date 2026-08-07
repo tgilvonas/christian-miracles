@@ -40,6 +40,7 @@ const editorConfig = {
 
 const form = reactive({
     happened_at: '',
+    year_to: '',
     published: false,
     at_holy_mass: false,
     translations: {} as Record<string, Record<string, string>>,
@@ -56,6 +57,7 @@ function normalizeDate(value?: string | null) {
 
 function syncForm() {
     form.happened_at = normalizeDate(props.miracle?.happened_at);
+    form.year_to = props.miracle?.year_to;
     form.published = Boolean(props.miracle?.published);
     form.at_holy_mass = Boolean(props.miracle?.at_holy_mass);
 
@@ -109,7 +111,9 @@ function addTextItem(localeCode: string) {
         {
             lang: localeCode,
             pos: existingItems.length + 1,
+            title: '',
             text: '',
+            citation: '',
         },
     ];
 
@@ -193,7 +197,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         <div class="p-3">
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                 <form class="space-y-6" @submit.prevent="submit">
-                    <div class="grid gap-4 md:grid-cols-2">
+                    <div class="grid gap-4 md:grid-cols-1">
                         <div>
                             <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
                                 {{ trans('happened_at') }}
@@ -201,6 +205,14 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <input
                                 v-model="form.happened_at"
                                 type="date"
+                                class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                            />
+                            <label class="mt-3 mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                {{ trans('year_to') }}
+                            </label>
+                            <input
+                                v-model="form.year_to"
+                                type="text"
                                 class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
                             />
                         </div>
@@ -334,6 +346,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                     </div>
                                                 </div>
                                                 
+                                                <div class="mb-2">
+                                                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        {{ trans('title') }}
+                                                        </label>
+                                                    <input
+                                                        v-model="textItem.title"
+                                                        type="text"
+                                                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 mb-1"
+                                                    />
+                                                </div>
+
                                                 <div class="text-black">
                                                     <ckeditor
                                                     :editor="ClassicEditor"
@@ -341,6 +364,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                     :config="editorConfig"
                                                     class="block min-h-80 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
                                                 />
+                                                </div>
+
+                                                <div class="mt-1">
+                                                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        {{ trans('info_source') }}
+                                                        </label>
+                                                    <input
+                                                        v-model="textItem.info_source"
+                                                        type="text"
+                                                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                                                    />
                                                 </div>
                                             </div>
 

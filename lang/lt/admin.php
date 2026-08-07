@@ -34,4 +34,6 @@ return [
     'remove' => 'Pašalinti',
     'position' => 'Pozicija',
     'block' => 'Blokas',
+    'year_to' => 'Metai iki',
+    'info_source' => 'Informacijos šaltinis'
 ];
