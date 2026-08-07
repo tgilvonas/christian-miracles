@@ -30,7 +30,12 @@ return new class extends Migration
             $table->integer('miracle_id');
             $table->string('image_orientation', 20)->nullable();
             $table->tinyInteger('has_image')->nullable();
+            $table->string('image_caption', 255)->nullable();
+            $table->string('image_credit', 255)->nullable();
+            $table->string('image_alt', 255)->nullable();
+            $table->string('title', 255)->nullable();
             $table->longText('text')->nullable();
+            $table->text('citation')->nullable();
             $table->softDeletes();
             $table->nullableTimestamps();
         });

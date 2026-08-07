@@ -27,6 +27,7 @@ return new class extends Migration
             $table->increments('id');
             $table->string('name')->nullable();
             $table->date('happened_at')->nullable();
+            $table->year('year_to')->nullable();
             $table->tinyInteger('published')->nullable();
             $table->softDeletes();
             $table->nullableTimestamps();
