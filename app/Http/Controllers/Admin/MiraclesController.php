@@ -8,6 +8,7 @@ use App\Models\MiracleText;
 use App\Models\MiracleTranslation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class MiraclesController extends Controller
@@ -104,6 +105,7 @@ class MiraclesController extends Controller
                         'pos' => $position,
                         'miracle_id' => $miracle->id,
                         'title' => $item['title'] ?? null,
+                        'anchor' => Str::slug($item['anchor'] ?? null),
                         'text' => $item['text'] ?? null,
                         'info_source' => $item['info_source'] ?? null,
                     ];
