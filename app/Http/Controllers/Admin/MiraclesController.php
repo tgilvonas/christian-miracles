@@ -18,6 +18,32 @@ class MiraclesController extends Controller
         return Inertia::render('admin/miracles/Index');
     }
 
+    public function getJsonList()
+    {
+        $query = Miracle::with('translations')->orderByDesc('id');
+
+        if ($searchText = request('search_text')) {
+            $query->whereHas('translations', function ($subQuery) use ($searchText) {
+                $subQuery->where('name', 'like', '%' . $searchText . '%');
+            });
+        }
+
+        $paginated = $query->paginate((int) request('paginate_by', 10));
+
+        $paginated->getCollection()->transform(function (Miracle $miracle) {
+            $record = $miracle->toArray();
+
+            foreach ($miracle->translations as $translation) {
+                $record['name_' . $translation->lang] = $translation->name;
+                $record['slug_' . $translation->lang] = $translation->slug;
+            }
+
+            return $record;
+        });
+
+        return $paginated;
+    }
+
     public function edit($miracleId)
     {
         if (is_numeric($miracleId)) {
@@ -128,5 +154,25 @@ class MiraclesController extends Controller
         });
 
         return redirect()->route('admin.miracles.edit', $miracle->id)->with('success', __('admin.record_saved_successfully'));
+    }
+
+    public function delete($miracleId)
+    {
+        $miracle = Miracle::with(['translations', 'texts', 'locations'])->findOrFail($miracleId);
+
+        foreach ($miracle->translations as $translation) {
+            $translation->delete();
+        }
+
+        foreach ($miracle->texts as $text) {
+            $text->delete();
+        }
+
+        $miracle->locations()->detach();
+        $miracle->delete();
+
+        return response()->json([
+            'message' => __('admin.record_deleted_successfully'),
+        ]);
     }
 }

@@ -36,4 +36,9 @@ return [
     'block' => 'Block',
     'year_to' => 'Year to',
     'info_source' => 'Info source',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'created_at' => 'Created at',
+    'updated_at' => 'Updated at',
+    'search' => 'Search',
 ];

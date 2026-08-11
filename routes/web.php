@@ -27,8 +27,10 @@ Route::middleware('auth')->group(function () {
     Route::delete('/admin/locations/{locationId}', [LocationsController::class, 'delete'])->name('admin.locations.delete');
 
     Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
+    Route::get('/admin/miracles/json-list', [MiraclesController::class, 'getJsonList'])->name('admin.miracles.json_list');
     Route::get('/admin/miracles/{miracleId}/edit', [MiraclesController::class, 'edit'])->name('admin.miracles.edit');
     Route::post('/admin/miracles/save/{miracleId?}', [MiraclesController::class, 'save'])->name('admin.miracles.save');
+    Route::delete('/admin/miracles/{miracleId}', [MiraclesController::class, 'delete'])->name('admin.miracles.delete');
 
     Route::get('/admin/users', [UsersController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/users/json-list', [UsersController::class, 'jsonList'])->name('admin.users.json_list');

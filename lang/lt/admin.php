@@ -35,5 +35,10 @@ return [
     'position' => 'Pozicija',
     'block' => 'Blokas',
     'year_to' => 'Metai iki',
-    'info_source' => 'Informacijos šaltinis'
+    'info_source' => 'Informacijos šaltinis',
+    'yes' => 'Taip',
+    'no' => 'Ne',
+    'created_at' => 'Sukurta',
+    'updated_at' => 'Atnaujinta',
+    'search' => 'Paieška',
 ];
