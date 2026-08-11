@@ -109,11 +109,14 @@ function saveLocation() {
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                                 {{ trans('slug') }}
                             </label>
-                            <input
-                                v-model="location.translations[activeTab].slug"
-                                :placeholder="trans('slug')"
-                                class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
-                            />
+                            <div class="flex items-center gap-2">
+                                /<input
+                                    v-model="location.translations[activeTab].slug"
+                                    :placeholder="trans('slug')"
+                                    class="border border-gray-300 dark:border-gray-600 rounded-md p-2 w-full"
+                                />
+                            </div>
+                            
                         </div>
 
                         <div class="mb-4">
