@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
+import FlashMessage from '@/components/FlashMessage.vue';
 import Tabs from '@/components/Tabs.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
@@ -9,6 +10,7 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 import { computed, reactive, watch } from 'vue';
 import { route } from 'ziggy-js';
+import state from '@/state.js';
 
 const props = defineProps<{
     miracle?: Record<string, any>;
@@ -180,6 +182,12 @@ function submit() {
     router.post(saveRoute, form, {
         preserveScroll: true,
         preserveState: false,
+        onSuccess: () => {
+            state.flashSuccessMessage({ message: trans('record_saved_successfully') });
+        },
+        onError: () => {
+            state.flashErrorMessage({ message: trans('error') });
+        },
     });
 }
 
@@ -195,6 +203,8 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head :title="trans('miracles')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
+            <FlashMessage type="success" />
+            <FlashMessage type="error" />
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                 <form class="space-y-6" @submit.prevent="submit">
                     <div class="grid gap-4 md:grid-cols-1">
