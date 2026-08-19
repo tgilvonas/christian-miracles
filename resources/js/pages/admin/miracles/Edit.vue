@@ -57,6 +57,49 @@ function normalizeDate(value?: string | null) {
     return String(value).slice(0, 10);
 }
 
+function buildFormData(payload: Record<string, any>) {
+    const formData = new FormData();
+
+    function appendValue(value: any, key?: string) {
+        if (value === undefined || value === null) {
+            return;
+        }
+
+        if (value instanceof File) {
+            if (key) {
+                formData.append(key, value);
+            }
+            return;
+        }
+
+        if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+                appendValue(item, `${key}[${index}]`);
+            });
+            return;
+        }
+
+        if (typeof value === 'object') {
+            Object.entries(value).forEach(([childKey, childValue]) => {
+                if (childKey === 'image_url' || childKey === 'image_preview') {
+                    return;
+                }
+
+                appendValue(childValue, key ? `${key}[${childKey}]` : childKey);
+            });
+            return;
+        }
+
+        if (key) {
+            formData.append(key, String(value));
+        }
+    }
+
+    appendValue(payload);
+
+    return formData;
+}
+
 function syncForm() {
     form.happened_at = normalizeDate(props.miracle?.happened_at);
     form.year_to = props.miracle?.year_to;
@@ -93,13 +136,19 @@ function syncForm() {
             .map((textItem: Record<string, any>) => ({
                 ...textItem,
                 pos: Number(textItem?.pos ?? 0) || 0,
+                title: textItem?.title ?? '',
                 text: textItem?.text ?? '',
+                citation: textItem?.citation ?? '',
+                info_source: textItem?.info_source ?? '',
+                image_url: textItem?.image_url ?? '',
+                image_preview: '',
+                image: null,
             }))
             .sort((left, right) => (left.pos ?? 0) - (right.pos ?? 0));
 
         nextTexts[localeCode] = existingTexts.length > 0
             ? existingTexts
-            : [{ lang: localeCode, pos: 1, text: '' }];
+            : [{ lang: localeCode, pos: 1, title: '', text: '', citation: '', info_source: '', image_url: '', image: null }];
     });
 
     form.translations = nextTranslations;
@@ -116,6 +165,10 @@ function addTextItem(localeCode: string) {
             title: '',
             text: '',
             citation: '',
+            info_source: '',
+            image_url: '',
+            image_preview: '',
+            image: null,
         },
     ];
 
@@ -166,6 +219,30 @@ function updateEditorContent(localeCode: string, index: number, event: Event) {
     form.texts[localeCode] = existingItems;
 }
 
+function handleImageChange(localeCode: string, index: number, event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    const existingItems = Array.isArray(form.texts[localeCode]) ? [...form.texts[localeCode]] : [];
+
+    if (index < 0 || index >= existingItems.length) {
+        return;
+    }
+
+    const previousPreview = existingItems[index]?.image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    existingItems[index] = {
+        ...existingItems[index],
+        image: file,
+        image_preview: file ? URL.createObjectURL(file) : '',
+    };
+
+    form.texts[localeCode] = existingItems;
+}
+
 watch(
     () => props.miracle,
     syncForm,
@@ -179,9 +256,10 @@ function submit() {
         ? route('admin.miracles.save', { miracleId: props.miracle.id })
         : route('admin.miracles.save');
 
-    router.post(saveRoute, form, {
+    router.post(saveRoute, buildFormData(form), {
         preserveScroll: true,
         preserveState: false,
+        forceFormData: true,
         onSuccess: () => {
             state.flashSuccessMessage({ message: trans('record_saved_successfully') });
         },
@@ -367,6 +445,33 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                         v-model="textItem.title"
                                                         type="text"
                                                         class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 mb-1"
+                                                    />
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        {{ trans('image') }}
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        @change="handleImageChange(activeTab as string, index, $event)"
+                                                        class="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-100"
+                                                    />
+                                                    <p v-if="textItem.image?.name" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                        Selected file: {{ textItem.image.name }}
+                                                    </p>
+                                                    <img
+                                                        v-if="textItem.image_preview"
+                                                        :src="textItem.image_preview"
+                                                        alt=""
+                                                        class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                                    />
+                                                    <img
+                                                        v-else-if="textItem.image_url"
+                                                        :src="textItem.image_url"
+                                                        alt=""
+                                                        class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
                                                     />
                                                 </div>
 

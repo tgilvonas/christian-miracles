@@ -47,7 +47,11 @@ class MiraclesController extends Controller
     public function edit($miracleId)
     {
         if (is_numeric($miracleId)) {
-            $miracle = Miracle::with(['translations', 'texts', 'locations'])->findOrFail($miracleId);
+            $miracle = Miracle::with(['translations', 'texts.media', 'locations'])->findOrFail($miracleId);
+
+            $miracle->texts->each(function ($text) {
+                $text->image_url = $text->getFirstMediaUrl('images');
+            });
         } else {
             $miracle = new Miracle();
             $miracle->translations = [];
@@ -72,7 +76,7 @@ class MiraclesController extends Controller
         $translationsData = $request->input('translations', []);
         $textsData = $request->input('texts', []);
 
-        $miracle = DB::transaction(function () use ($miraclePayload, $translationsData, $textsData, $miracleId): Miracle {
+        $miracle = DB::transaction(function () use ($request, $miraclePayload, $translationsData, $textsData, $miracleId): Miracle {
             if (is_numeric($miracleId)) {
                 $miracle = Miracle::findOrFail($miracleId);
                 $miracle->update($miraclePayload);
@@ -141,7 +145,14 @@ class MiraclesController extends Controller
                     if ($textRecord) {
                         $textRecord->update($payload);
                     } else {
-                        MiracleText::query()->create($payload);
+                        $textRecord = MiracleText::query()->create($payload);
+                    }
+
+                    $uploadedImage = $request->file("texts.{$locale}.{$index}.image");
+
+                    if ($uploadedImage) {
+                        $textRecord->clearMediaCollection('images');
+                        $textRecord->addMedia($uploadedImage)->toMediaCollection('images');
                     }
                 }
 
