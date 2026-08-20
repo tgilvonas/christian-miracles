@@ -48,6 +48,7 @@ class MiraclesController extends Controller
     {
         if (is_numeric($miracleId)) {
             $miracle = Miracle::with(['translations', 'texts.media', 'locations'])->findOrFail($miracleId);
+            $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
 
             $miracle->texts->each(function ($text) {
                 $text->image_url = $text->getFirstMediaUrl('images');
@@ -57,6 +58,7 @@ class MiraclesController extends Controller
             $miracle->translations = [];
             $miracle->texts = [];
             $miracle->locations = [];
+            $miracle->intro_image_url = '';
         }
 
         return Inertia::render('admin/miracles/Edit', [
@@ -82,6 +84,13 @@ class MiraclesController extends Controller
                 $miracle->update($miraclePayload);
             } else {
                 $miracle = Miracle::create($miraclePayload);
+            }
+
+            $uploadedIntroImage = $request->file('intro_image');
+
+            if ($uploadedIntroImage) {
+                $miracle->clearMediaCollection('intro_image');
+                $miracle->addMedia($uploadedIntroImage)->toMediaCollection('intro_image');
             }
 
             $incomingTranslationLocales = array_keys(is_array($translationsData) ? $translationsData : []);

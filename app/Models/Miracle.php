@@ -13,6 +13,11 @@ class Miracle extends Model implements HasMedia
 
     protected $guarded = ['id'];
 
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('intro_image')->singleFile();
+    }
+
     public function translations()
     {
         return $this->hasMany(MiracleTranslation::class, 'miracle_id', 'id');

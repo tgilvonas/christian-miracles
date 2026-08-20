@@ -7,11 +7,48 @@ use App\Models\MiracleText;
 use App\Models\MiracleTranslation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MiracleSaveTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_it_uploads_an_intro_image_for_the_miracle(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->post(route('admin.miracles.save'), [
+            'happened_at' => '2025-03-12',
+            'published' => true,
+            'intro_image' => UploadedFile::fake()->image('intro.jpg'),
+            'translations' => [
+                'en' => [
+                    'name' => 'Intro image miracle',
+                    'slug' => 'intro-image-miracle',
+                    'meta_description' => 'Intro description',
+                    'meta_keywords' => 'intro, miracle',
+                    'description' => 'Intro narrative',
+                ],
+            ],
+            'texts' => [],
+        ]);
+
+        $response->assertRedirect();
+
+        $miracle = Miracle::query()->latest()->firstOrFail();
+
+        $this->assertTrue($miracle->getFirstMediaUrl('intro_image') !== '');
+        $this->assertDatabaseHas('media', [
+            'model_id' => $miracle->id,
+            'model_type' => Miracle::class,
+            'collection_name' => 'intro_image',
+        ]);
+    }
 
     public function test_it_creates_and_updates_translations_and_text_blocks(): void
     {

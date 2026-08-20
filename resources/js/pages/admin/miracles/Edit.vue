@@ -45,6 +45,9 @@ const form = reactive({
     year_to: '',
     published: false,
     at_holy_mass: false,
+    intro_image: null as File | null,
+    intro_image_url: '',
+    intro_image_preview: '',
     translations: {} as Record<string, Record<string, string>>,
     texts: {} as Record<string, Array<Record<string, any>>>,
 });
@@ -81,7 +84,7 @@ function buildFormData(payload: Record<string, any>) {
 
         if (typeof value === 'object') {
             Object.entries(value).forEach(([childKey, childValue]) => {
-                if (childKey === 'image_url' || childKey === 'image_preview') {
+                if (childKey === 'image_url' || childKey === 'image_preview' || childKey === 'intro_image_url' || childKey === 'intro_image_preview') {
                     return;
                 }
 
@@ -105,6 +108,9 @@ function syncForm() {
     form.year_to = props.miracle?.year_to;
     form.published = Boolean(props.miracle?.published);
     form.at_holy_mass = Boolean(props.miracle?.at_holy_mass);
+    form.intro_image = null;
+    form.intro_image_preview = '';
+    form.intro_image_url = props.miracle?.intro_image_url ?? '';
 
     const translationsByLocale = Object.fromEntries(
         (Array.isArray(props.miracle?.translations) ? props.miracle.translations : []).map((translation: Record<string, any>) => [
@@ -243,6 +249,19 @@ function handleImageChange(localeCode: string, index: number, event: Event) {
     form.texts[localeCode] = existingItems;
 }
 
+function handleIntroImageChange(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    const previousPreview = form.intro_image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    form.intro_image = file;
+    form.intro_image_preview = file ? URL.createObjectURL(file) : '';
+}
+
 watch(
     () => props.miracle,
     syncForm,
@@ -315,6 +334,33 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <input v-model="form.at_holy_mass" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
                                 <span>{{ trans('at_holy_mass') }}</span>
                             </label>
+
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ trans('intro_image') }}
+                                </label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    @change="handleIntroImageChange($event)"
+                                    class="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-100"
+                                />
+                                <p v-if="form.intro_image?.name" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                    Selected file: {{ form.intro_image.name }}
+                                </p>
+                                <img
+                                    v-if="form.intro_image_preview"
+                                    :src="form.intro_image_preview"
+                                    alt=""
+                                    class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                />
+                                <img
+                                    v-else-if="form.intro_image_url"
+                                    :src="form.intro_image_url"
+                                    alt=""
+                                    class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                />
+                            </div>
                         </div>
                     </div>
 

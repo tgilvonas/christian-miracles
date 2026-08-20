@@ -42,4 +42,5 @@ return [
     'updated_at' => 'Atnaujinta',
     'search' => 'Paieška',
     'image' => 'Paveikslėlis',
+    'intro_image' => 'Pagrindinis paveikslėlis',
 ];

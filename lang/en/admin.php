@@ -42,4 +42,5 @@ return [
     'updated_at' => 'Updated at',
     'search' => 'Search',
     'image' => 'Image',
+    'intro_image' => 'Intro image',
 ];
