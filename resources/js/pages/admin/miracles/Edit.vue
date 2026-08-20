@@ -3,12 +3,13 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Tabs from '@/components/Tabs.vue';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
 import { type BreadcrumbItem } from '@/types';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
-import { computed, reactive, watch } from 'vue';
+import axios from 'axios';
+import { computed, reactive, ref, watch } from 'vue';
 import { route } from 'ziggy-js';
 import state from '@/state.js';
 
@@ -16,6 +17,7 @@ const props = defineProps<{
     miracle?: Record<string, any>;
 }>();
 
+const miracleState = ref<Record<string, any> | undefined>(props.miracle);
 const page = usePage();
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
 const ckeditor = Ckeditor;
@@ -104,16 +106,18 @@ function buildFormData(payload: Record<string, any>) {
 }
 
 function syncForm() {
-    form.happened_at = normalizeDate(props.miracle?.happened_at);
-    form.year_to = props.miracle?.year_to;
-    form.published = Boolean(props.miracle?.published);
-    form.at_holy_mass = Boolean(props.miracle?.at_holy_mass);
+    const miracle = miracleState.value ?? props.miracle;
+
+    form.happened_at = normalizeDate(miracle?.happened_at);
+    form.year_to = miracle?.year_to;
+    form.published = Boolean(miracle?.published);
+    form.at_holy_mass = Boolean(miracle?.at_holy_mass);
     form.intro_image = null;
     form.intro_image_preview = '';
-    form.intro_image_url = props.miracle?.intro_image_url ?? '';
+    form.intro_image_url = miracle?.intro_image_url ?? '';
 
     const translationsByLocale = Object.fromEntries(
-        (Array.isArray(props.miracle?.translations) ? props.miracle.translations : []).map((translation: Record<string, any>) => [
+        (Array.isArray(miracle?.translations) ? miracle.translations : []).map((translation: Record<string, any>) => [
             translation?.lang ?? '',
             { ...translation },
         ])
@@ -264,28 +268,37 @@ function handleIntroImageChange(event: Event) {
 
 watch(
     () => props.miracle,
-    syncForm,
+    (value) => {
+        miracleState.value = value;
+        syncForm();
+    },
     { deep: true, immediate: true }
 );
 
 watch(localeEntries, syncForm, { deep: true, immediate: true });
 
 function submit() {
-    const saveRoute = props.miracle?.id
-        ? route('admin.miracles.save', { miracleId: props.miracle.id })
+    const currentMiracleId = miracleState.value?.id ?? props.miracle?.id;
+    const saveRoute = currentMiracleId
+        ? route('admin.miracles.save', { miracleId: currentMiracleId })
         : route('admin.miracles.save');
 
-    router.post(saveRoute, buildFormData(form), {
-        preserveScroll: true,
-        preserveState: false,
-        forceFormData: true,
-        onSuccess: () => {
-            state.flashSuccessMessage({ message: trans('record_saved_successfully') });
-        },
-        onError: () => {
+    axios.post(saveRoute, buildFormData(form))
+        .then((response) => {
+            const nextMiracle = response.data?.miracle ?? miracleState.value;
+
+            if (nextMiracle) {
+                miracleState.value = nextMiracle;
+            }
+
+            syncForm();
+            state.flashSuccessMessage({
+                message: response.data?.message || trans('record_saved_successfully'),
+            });
+        })
+        .catch(() => {
             state.flashErrorMessage({ message: trans('error') });
-        },
-    });
+        });
 }
 
 const breadcrumbs: BreadcrumbItem[] = [

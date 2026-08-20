@@ -38,7 +38,9 @@ class MiracleSaveTest extends TestCase
             'texts' => [],
         ]);
 
-        $response->assertRedirect();
+        $response->assertOk()
+            ->assertJsonPath('message', __('admin.record_saved_successfully'))
+            ->assertJsonPath('miracle.id', fn ($id) => !empty($id));
 
         $miracle = Miracle::query()->latest()->firstOrFail();
 
@@ -79,7 +81,8 @@ class MiracleSaveTest extends TestCase
         ];
 
         $this->postJson(route('admin.miracles.save'), $createPayload)
-            ->assertRedirect();
+            ->assertOk()
+            ->assertJsonPath('message', __('admin.record_saved_successfully'));
 
         $miracle = Miracle::query()->latest()->firstOrFail();
 
@@ -133,7 +136,8 @@ class MiracleSaveTest extends TestCase
         ];
 
         $this->postJson(route('admin.miracles.save', ['miracleId' => $miracle->id]), $updatePayload)
-            ->assertRedirect();
+            ->assertOk()
+            ->assertJsonPath('message', __('admin.record_saved_successfully'));
 
         $this->assertDatabaseCount('miracles_translations', 1);
         $this->assertDatabaseHas('miracles_translations', [
