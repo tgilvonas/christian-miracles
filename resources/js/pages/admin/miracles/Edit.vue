@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import Tabs from '@/components/Tabs.vue';
+import VueSelect from '@/components/VueSelect.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
 import { type BreadcrumbItem } from '@/types';
@@ -20,6 +21,7 @@ const props = defineProps<{
 const miracleState = ref<Record<string, any> | undefined>(props.miracle);
 const page = usePage();
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
+const availableLocations = ref<Array<{ value: number; label: string }>>([]);
 const ckeditor = Ckeditor;
 const editorConfig = {
     toolbar: ['sourceEditing', 'bold', 'italic', 'underline', 'bulletedList', 'blockQuote', 'link'],
@@ -50,6 +52,7 @@ const form = reactive({
     intro_image: null as File | null,
     intro_image_url: '',
     intro_image_preview: '',
+    locations: [] as Array<number>,
     translations: {} as Record<string, Record<string, string>>,
     texts: {} as Record<string, Array<Record<string, any>>>,
 });
@@ -105,6 +108,40 @@ function buildFormData(payload: Record<string, any>) {
     return formData;
 }
 
+function getLocationLabel(location: Record<string, any>) {
+    const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
+    const shortLocale = localeCode.split('_')[0];
+
+    if (location?.[`name_${localeCode}`]) {
+        return location[`name_${localeCode}`];
+    }
+
+    if (location?.[`name_${shortLocale}`]) {
+        return location[`name_${shortLocale}`];
+    }
+
+    if (location?.name) {
+        return location.name;
+    }
+
+    return `Location #${location?.id ?? '-'}`;
+}
+
+function loadLocations() {
+    axios.get(route('admin.locations.json_list'), {
+        params: {
+            paginate_by: 9999,
+        },
+    }).then((response) => {
+        availableLocations.value = (response.data?.data ?? response.data ?? []).map((location: Record<string, any>) => ({
+            value: Number(location.id),
+            label: getLocationLabel(location),
+        }));
+    }).catch((error) => {
+        console.error('Unable to load locations', error);
+    });
+}
+
 function syncForm() {
     const miracle = miracleState.value ?? props.miracle;
 
@@ -115,6 +152,9 @@ function syncForm() {
     form.intro_image = null;
     form.intro_image_preview = '';
     form.intro_image_url = miracle?.intro_image_url ?? '';
+    form.locations = Array.isArray(miracle?.locations)
+        ? miracle.locations.map((location: Record<string, any>) => Number(location?.id ?? location?.location_id ?? 0)).filter(Boolean)
+        : [];
 
     const translationsByLocale = Object.fromEntries(
         (Array.isArray(miracle?.translations) ? miracle.translations : []).map((translation: Record<string, any>) => [
@@ -277,6 +317,8 @@ watch(
 
 watch(localeEntries, syncForm, { deep: true, immediate: true });
 
+loadLocations();
+
 function submit() {
     const currentMiracleId = miracleState.value?.id ?? props.miracle?.id;
     const saveRoute = currentMiracleId
@@ -372,6 +414,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     :src="form.intro_image_url"
                                     alt=""
                                     class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                />
+                            </div>
+
+                            <div>
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ trans('locations') }}
+                                </label>
+                                <VueSelect
+                                    v-model="form.locations"
+                                    :options="availableLocations"
+                                    :placeholder="trans('select_locations')"
                                 />
                             </div>
                         </div>

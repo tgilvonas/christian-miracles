@@ -72,8 +72,9 @@ class MiraclesController extends Controller
 
         $translationsData = $request->input('translations', []);
         $textsData = $request->input('texts', []);
+        $locationIds = array_values(array_filter(array_map('intval', (array) $request->input('locations', []))));
 
-        $miracle = DB::transaction(function () use ($request, $miraclePayload, $translationsData, $textsData, $miracleId): Miracle {
+        $miracle = DB::transaction(function () use ($request, $miraclePayload, $translationsData, $textsData, $locationIds, $miracleId): Miracle {
             if (is_numeric($miracleId)) {
                 $miracle = Miracle::findOrFail($miracleId);
                 $miracle->update($miraclePayload);
@@ -86,6 +87,8 @@ class MiraclesController extends Controller
                 $miracle->clearMediaCollection('intro_image');
                 $miracle->addMedia($uploadedIntroImage)->toMediaCollection('intro_image');
             }
+
+            $miracle->locations()->sync($locationIds);
 
             $incomingTranslationLocales = array_keys(is_array($translationsData) ? $translationsData : []);
 

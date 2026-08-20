@@ -43,4 +43,5 @@ return [
     'search' => 'Paieška',
     'image' => 'Paveikslėlis',
     'intro_image' => 'Pagrindinis paveikslėlis',
+    'select_locations' => 'Pasirinkite vietoves',
 ];
