@@ -32,4 +32,16 @@ class Miracle extends Model implements HasMedia
     {
         return $this->belongsToMany(Location::class, 'miracles_locations', 'miracle_id', 'location_id');
     }
+
+    public static function getMiracle(int $id)
+    {
+        $miracle = self::with(['translations', 'texts.media', 'locations'])->findOrFail($id);
+        if ($miracle) {
+            $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
+            $miracle->texts->each(function ($text) {
+                $text->image_url = $text->getFirstMediaUrl('images');
+            });
+        }
+        return $miracle;
+    }
 }

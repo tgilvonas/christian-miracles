@@ -47,12 +47,7 @@ class MiraclesController extends Controller
     public function edit($miracleId)
     {
         if (is_numeric($miracleId)) {
-            $miracle = Miracle::with(['translations', 'texts.media', 'locations'])->findOrFail($miracleId);
-            $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
-
-            $miracle->texts->each(function ($text) {
-                $text->image_url = $text->getFirstMediaUrl('images');
-            });
+            $miracle = Miracle::getMiracle($miracleId);
         } else {
             $miracle = new Miracle();
             $miracle->translations = [];
@@ -87,7 +82,6 @@ class MiraclesController extends Controller
             }
 
             $uploadedIntroImage = $request->file('intro_image');
-
             if ($uploadedIntroImage) {
                 $miracle->clearMediaCollection('intro_image');
                 $miracle->addMedia($uploadedIntroImage)->toMediaCollection('intro_image');
@@ -173,7 +167,10 @@ class MiraclesController extends Controller
             return $miracle;
         });
 
-        return redirect()->route('admin.miracles.edit', $miracle->id)->with('success', __('admin.record_saved_successfully'));
+        return response()->json([
+            'message' => __('admin.record_saved_successfully'),
+            'miracle' => Miracle::getMiracle($miracle->id),
+        ]);
     }
 
     public function delete($miracleId)
