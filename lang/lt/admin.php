@@ -41,4 +41,5 @@ return [
     'created_at' => 'Sukurta',
     'updated_at' => 'Atnaujinta',
     'search' => 'Paieška',
+    'image' => 'Paveikslėlis',
 ];
