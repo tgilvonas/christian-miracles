@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Person;
+use App\Models\PersonText;
+use App\Models\PersonTranslation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class PersonsController extends Controller
@@ -16,18 +19,42 @@ class PersonsController extends Controller
 
     public function getJsonList()
     {
-        $query = Person::query()->orderByDesc('id');
+        $query = Person::with('translations')->orderByDesc('id');
 
         if ($searchText = request('search_text')) {
-            $query->where('name', 'like', '%' . $searchText . '%');
+            $query->where(function ($searchQuery) use ($searchText) {
+                $searchQuery->where('name', 'like', '%' . $searchText . '%');
+                $searchQuery->orWhereHas('translations', function ($translationQuery) use ($searchText) {
+                    $translationQuery->where('name', 'like', '%' . $searchText . '%');
+                });
+            });
         }
 
-        return $query->paginate((int) request('paginate_by', 10));
+        $paginated = $query->paginate((int) request('paginate_by', 10));
+
+        $paginated->getCollection()->transform(function (Person $person) {
+            $record = $person->toArray();
+
+            foreach ($person->translations as $translation) {
+                $record['name_' . $translation->lang] = $translation->name;
+                $record['slug_' . $translation->lang] = $translation->slug;
+            }
+
+            return $record;
+        });
+
+        return $paginated;
     }
 
     public function edit($personId)
     {
-        $person = is_numeric($personId) ? Person::findOrFail($personId) : new Person();
+        if (is_numeric($personId)) {
+            $person = Person::getPerson($personId);
+        } else {
+            $person = new Person();
+            $person->translations = [];
+            $person->texts = [];
+        }
 
         return Inertia::render('admin/persons/Edit', [
             'person' => $person,
@@ -36,29 +63,114 @@ class PersonsController extends Controller
 
     public function save(Request $request, $personId = null)
     {
-        $payload = [
+        $personPayload = [
             'name' => $request->input('name'),
             'beatified_at' => $request->input('beatified_at') ?: null,
             'canonized_at' => $request->input('canonized_at') ?: null,
             'published' => (int) (bool) $request->input('published'),
         ];
 
-        if (is_numeric($personId)) {
-            $person = Person::findOrFail($personId);
-            $person->update($payload);
-        } else {
-            $person = Person::create($payload);
-        }
+        $translationsData = $request->input('translations', []);
+        $textsData = $request->input('texts', []);
+
+        $person = DB::transaction(function () use ($request, $personPayload, $translationsData, $textsData, $personId): Person {
+            if (is_numeric($personId)) {
+                $person = Person::findOrFail($personId);
+                $person->update($personPayload);
+            } else {
+                $person = Person::create($personPayload);
+            }
+
+            $incomingTranslationLocales = array_keys(is_array($translationsData) ? $translationsData : []);
+
+            if (!empty($incomingTranslationLocales)) {
+                $person->translations()->whereNotIn('lang', $incomingTranslationLocales)->delete();
+            }
+
+            foreach ($translationsData as $locale => $translationData) {
+                $translationData = is_array($translationData) ? $translationData : [];
+
+                $payload = array_merge($translationData, [
+                    'lang' => $locale,
+                    'person_id' => $person->id,
+                ]);
+
+                $translation = PersonTranslation::query()
+                    ->where('person_id', $person->id)
+                    ->where('lang', $locale)
+                    ->first();
+
+                if ($translation) {
+                    $translation->update($payload);
+                } else {
+                    PersonTranslation::query()->create($payload);
+                }
+            }
+
+            $incomingTextLocales = array_keys(is_array($textsData) ? $textsData : []);
+
+            if (!empty($incomingTextLocales)) {
+                $person->texts()->whereNotIn('lang', $incomingTextLocales)->delete();
+            }
+
+            foreach ($textsData as $locale => $items) {
+                $items = is_array($items) ? array_values($items) : [];
+                $existingTexts = PersonText::query()
+                    ->where('person_id', $person->id)
+                    ->where('lang', $locale)
+                    ->get();
+
+                $positions = [];
+
+                foreach ($items as $index => $item) {
+                    $item = is_array($item) ? $item : [];
+                    $position = isset($item['pos']) ? (int) $item['pos'] : $index + 1;
+                    $positions[] = $position;
+
+                    $payload = [
+                        'lang' => $locale,
+                        'pos' => $position,
+                        'person_id' => $person->id,
+                        'title' => $item['title'] ?? null,
+                        'text' => $item['text'] ?? null,
+                        'info_source' => $item['info_source'] ?? null,
+                    ];
+
+                    $textRecord = $existingTexts->firstWhere('pos', $position);
+
+                    if ($textRecord) {
+                        $textRecord->update($payload);
+                    } else {
+                        PersonText::query()->create($payload);
+                    }
+                }
+
+                $existingTexts->whereNotIn('pos', $positions)->each(function ($textRecord) {
+                    $textRecord->delete();
+                });
+            }
+
+            return $person;
+        });
 
         return response()->json([
             'message' => __('admin.record_saved_successfully'),
-            'person' => $person->fresh(),
+            'person' => Person::getPerson($person->id),
         ]);
     }
 
     public function delete($personId)
     {
-        $person = Person::findOrFail($personId);
+        $person = Person::with(['translations', 'texts'])->findOrFail($personId);
+
+        foreach ($person->translations as $translation) {
+            $translation->delete();
+        }
+
+        foreach ($person->texts as $text) {
+            $text->delete();
+        }
+
         $person->delete();
 
         return response()->json([

@@ -55,4 +55,54 @@ class PersonCrudTest extends TestCase
         $deleteResponse->assertOk();
         $this->assertSoftDeleted('persons', ['id' => $person->id]);
     }
+
+    public function test_it_saves_translations_and_text_blocks_for_a_person(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->postJson(route('admin.persons.save'), [
+            'name' => 'Translated Person',
+            'published' => true,
+            'translations' => [
+                'en' => [
+                    'name' => 'Translated Person',
+                    'slug' => 'translated-person',
+                    'meta_description' => 'English bio summary',
+                    'meta_keywords' => 'person, biography',
+                    'biography' => 'English biography text',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Life story',
+                        'text' => '<p>First block</p>',
+                        'info_source' => 'Source one',
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertOk();
+
+        $person = Person::query()->where('name', 'Translated Person')->firstOrFail();
+
+        $this->assertDatabaseHas('persons_translations', [
+            'person_id' => $person->id,
+            'lang' => 'en',
+            'name' => 'Translated Person',
+            'slug' => 'translated-person',
+        ]);
+
+        $this->assertDatabaseHas('persons_texts', [
+            'person_id' => $person->id,
+            'lang' => 'en',
+            'pos' => 1,
+            'title' => 'Life story',
+            'text' => '<p>First block</p>',
+        ]);
+    }
 }
