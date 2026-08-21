@@ -21,13 +21,14 @@ const personState = ref<Record<string, any> | undefined>(props.person);
 const page = usePage();
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
 const ckeditor = Ckeditor;
-const editorConfig = {
+const editorCtor: any = ClassicEditor;
+const editorConfig: any = {
     toolbar: ['sourceEditing', 'bold', 'italic', 'underline', 'bulletedList', 'blockQuote', 'link'],
     shouldNotGroupWhenFull: true,
     height: 700,
     ui: {
         poweredBy: {
-            position: 'outside',
+            position: 'outside' as const,
         },
     },
     heading: {
@@ -47,9 +48,56 @@ const form = reactive({
     beatified_at: '',
     canonized_at: '',
     published: false,
+    remove_intro_image: false,
+    intro_image: null as File | null,
+    intro_image_url: '',
+    intro_image_preview: '',
     translations: {} as Record<string, Record<string, string>>,
     texts: {} as Record<string, Array<Record<string, any>>>,
 });
+
+function buildFormData(payload: Record<string, any>) {
+    const formData = new FormData();
+
+    function appendValue(value: any, key?: string) {
+        if (value === undefined || value === null) {
+            return;
+        }
+
+        if (value instanceof File) {
+            if (key) {
+                formData.append(key, value);
+            }
+            return;
+        }
+
+        if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+                appendValue(item, `${key}[${index}]`);
+            });
+            return;
+        }
+
+        if (typeof value === 'object') {
+            Object.entries(value).forEach(([childKey, childValue]) => {
+                if (childKey === 'image_url' || childKey === 'image_preview' || childKey === 'intro_image_url' || childKey === 'intro_image_preview') {
+                    return;
+                }
+
+                appendValue(childValue, key ? `${key}[${childKey}]` : childKey);
+            });
+            return;
+        }
+
+        if (key) {
+            formData.append(key, String(value));
+        }
+    }
+
+    appendValue(payload);
+
+    return formData;
+}
 
 function normalizeDate(value?: string | null) {
     if (!value) {
@@ -66,6 +114,10 @@ function syncForm() {
     form.beatified_at = normalizeDate(person?.beatified_at);
     form.canonized_at = normalizeDate(person?.canonized_at);
     form.published = Boolean(person?.published);
+    form.remove_intro_image = false;
+    form.intro_image = null;
+    form.intro_image_preview = '';
+    form.intro_image_url = person?.intro_image_url ?? '';
 
     const translationsByLocale = Object.fromEntries(
         (Array.isArray(person?.translations) ? person.translations : []).map((translation: Record<string, any>) => [
@@ -100,12 +152,16 @@ function syncForm() {
                 title: textItem?.title ?? '',
                 text: textItem?.text ?? '',
                 info_source: textItem?.info_source ?? '',
+                image_url: textItem?.image_url ?? '',
+                image_preview: '',
+                remove_image: false,
+                image: null,
             }))
             .sort((left, right) => (left.pos ?? 0) - (right.pos ?? 0));
 
         nextTexts[localeCode] = existingTexts.length > 0
             ? existingTexts
-            : [{ lang: localeCode, pos: 1, title: '', text: '', info_source: '' }];
+            : [{ lang: localeCode, pos: 1, title: '', text: '', info_source: '', image_url: '', image_preview: '', remove_image: false, image: null }];
     });
 
     form.translations = nextTranslations;
@@ -122,6 +178,10 @@ function addTextItem(localeCode: string) {
             title: '',
             text: '',
             info_source: '',
+            image_url: '',
+            image_preview: '',
+            remove_image: false,
+            image: null,
         },
     ];
 
@@ -160,16 +220,81 @@ function moveTextItem(localeCode: string, index: number, direction: -1 | 1) {
     form.texts[localeCode] = existingItems;
 }
 
-function updateEditorContent(localeCode: string, index: number, event: Event) {
-    const target = event.target as HTMLElement | null;
+function handleImageChange(localeCode: string, index: number, event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
     const existingItems = Array.isArray(form.texts[localeCode]) ? [...form.texts[localeCode]] : [];
 
-    if (!target || index < 0 || index >= existingItems.length) {
+    if (index < 0 || index >= existingItems.length) {
         return;
     }
 
-    existingItems[index].text = target.innerHTML;
+    const previousPreview = existingItems[index]?.image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    existingItems[index] = {
+        ...existingItems[index],
+        image: file,
+        image_preview: file ? URL.createObjectURL(file) : '',
+        image_url: file ? '' : existingItems[index]?.image_url ?? '',
+        remove_image: false,
+    };
+
     form.texts[localeCode] = existingItems;
+}
+
+function clearTextImage(localeCode: string, index: number) {
+    const existingItems = Array.isArray(form.texts[localeCode]) ? [...form.texts[localeCode]] : [];
+
+    if (index < 0 || index >= existingItems.length) {
+        return;
+    }
+
+    const previousPreview = existingItems[index]?.image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    existingItems[index] = {
+        ...existingItems[index],
+        image: null,
+        image_preview: '',
+        image_url: '',
+        remove_image: true,
+    };
+
+    form.texts[localeCode] = existingItems;
+}
+
+function handleIntroImageChange(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0] ?? null;
+    const previousPreview = form.intro_image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    form.remove_intro_image = false;
+    form.intro_image = file;
+    form.intro_image_preview = file ? URL.createObjectURL(file) : '';
+}
+
+function clearIntroImage() {
+    const previousPreview = form.intro_image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    form.remove_intro_image = true;
+    form.intro_image = null;
+    form.intro_image_preview = '';
+    form.intro_image_url = '';
 }
 
 watch(
@@ -189,10 +314,7 @@ function submit() {
         ? route('admin.persons.save', { personId: currentPersonId })
         : route('admin.persons.save');
 
-    axios.post(saveRoute, {
-        ...form,
-        name: form.name,
-    })
+    axios.post(saveRoute, buildFormData(form))
         .then((response) => {
             const nextPerson = response.data?.person ?? personState.value;
 
@@ -266,6 +388,39 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <input v-model="form.published" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
                                 <span>{{ trans('published') }}</span>
                             </label>
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                {{ trans('intro_image') }}
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                @change="handleIntroImageChange($event)"
+                                class="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-100"
+                            />
+                            <div v-if="form.intro_image_url || form.intro_image_preview" class="mt-3 flex items-center gap-2">
+                                <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                    <input v-model="form.remove_intro_image" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
+                                    <span>{{ trans('remove_image') }}</span>
+                                </label>
+                            </div>
+                            <p v-if="form.intro_image?.name" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                Selected file: {{ form.intro_image.name }}
+                            </p>
+                            <img
+                                v-if="!form.remove_intro_image && form.intro_image_preview"
+                                :src="form.intro_image_preview"
+                                alt=""
+                                class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                            />
+                            <img
+                                v-else-if="!form.remove_intro_image && form.intro_image_url"
+                                :src="form.intro_image_url"
+                                alt=""
+                                class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                            />
                         </div>
                     </div>
 
@@ -400,9 +555,42 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                     />
                                                 </div>
 
+                                                <div class="mb-2">
+                                                    <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                        {{ trans('image') }}
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        @change="handleImageChange(activeTab as string, index, $event)"
+                                                        class="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-100"
+                                                    />
+                                                    <div v-if="textItem.image_url || textItem.image_preview || textItem.image" class="mt-3 flex items-center gap-2">
+                                                        <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                                            <input v-model="textItem.remove_image" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
+                                                            <span>{{ trans('remove_image') }}</span>
+                                                        </label>
+                                                    </div>
+                                                    <p v-if="textItem.image?.name" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                        Selected file: {{ textItem.image.name }}
+                                                    </p>
+                                                    <img
+                                                        v-if="!textItem.remove_image && textItem.image_preview"
+                                                        :src="textItem.image_preview"
+                                                        alt=""
+                                                        class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                                    />
+                                                    <img
+                                                        v-else-if="!textItem.remove_image && textItem.image_url"
+                                                        :src="textItem.image_url"
+                                                        alt=""
+                                                        class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
+                                                    />
+                                                </div>
+
                                                 <div class="text-black">
                                                     <ckeditor
-                                                        :editor="ClassicEditor"
+                                                        :editor="editorCtor"
                                                         v-model="textItem.text"
                                                         :config="editorConfig"
                                                         class="block min-h-80 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"

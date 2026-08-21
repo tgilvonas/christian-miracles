@@ -23,13 +23,14 @@ const page = usePage();
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
 const availableLocations = ref<Array<{ value: number; label: string }>>([]);
 const ckeditor = Ckeditor;
-const editorConfig = {
+const editorCtor: any = ClassicEditor;
+const editorConfig: any = {
     toolbar: ['sourceEditing', 'bold', 'italic', 'underline', 'bulletedList', 'blockQuote', 'link'],
     shouldNotGroupWhenFull: true,
     height: 700,
     ui: {
         poweredBy: {
-            position: 'outside',
+            position: 'outside' as const,
         },
     },
     heading: {
@@ -639,11 +640,11 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                                                 <div class="text-black">
                                                     <ckeditor
-                                                    :editor="ClassicEditor"
-                                                    v-model="textItem.text"
-                                                    :config="editorConfig"
-                                                    class="block min-h-80 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
-                                                />
+                                                        :editor="editorCtor"
+                                                        v-model="textItem.text"
+                                                        :config="editorConfig"
+                                                        class="block min-h-80 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-black shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800"
+                                                    />
                                                 </div>
 
                                                 <div class="mt-1">

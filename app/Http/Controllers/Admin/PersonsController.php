@@ -107,6 +107,18 @@ class PersonsController extends Controller
                 }
             }
 
+            $removeIntroImage = $request->boolean('remove_intro_image', false);
+            $uploadedIntroImage = $request->file('intro_image');
+
+            if ($removeIntroImage) {
+                $person->clearMediaCollection('intro_image');
+            }
+
+            if ($uploadedIntroImage) {
+                $person->clearMediaCollection('intro_image');
+                $person->addMedia($uploadedIntroImage)->toMediaCollection('intro_image');
+            }
+
             $incomingTextLocales = array_keys(is_array($textsData) ? $textsData : []);
 
             if (!empty($incomingTextLocales)) {
@@ -141,7 +153,19 @@ class PersonsController extends Controller
                     if ($textRecord) {
                         $textRecord->update($payload);
                     } else {
-                        PersonText::query()->create($payload);
+                        $textRecord = PersonText::query()->create($payload);
+                    }
+
+                    $removeImage = $request->boolean("texts.{$locale}.{$index}.remove_image", false);
+                    $uploadedImage = $request->file("texts.{$locale}.{$index}.image");
+
+                    if ($removeImage) {
+                        $textRecord->clearMediaCollection('images');
+                    }
+
+                    if ($uploadedImage) {
+                        $textRecord->clearMediaCollection('images');
+                        $textRecord->addMedia($uploadedImage)->toMediaCollection('images');
                     }
                 }
 

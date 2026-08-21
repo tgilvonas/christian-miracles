@@ -3,8 +3,11 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\Person;
+use App\Models\PersonText;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PersonCrudTest extends TestCase
@@ -104,5 +107,78 @@ class PersonCrudTest extends TestCase
             'title' => 'Life story',
             'text' => '<p>First block</p>',
         ]);
+    }
+
+    public function test_it_uploads_and_removes_person_images(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $createResponse = $this->postJson(route('admin.persons.save'), [
+            'name' => 'Photo Person',
+            'published' => true,
+            'intro_image' => UploadedFile::fake()->image('person-intro.jpg'),
+            'translations' => [
+                'en' => [
+                    'name' => 'Photo Person',
+                    'slug' => 'photo-person',
+                    'meta_description' => 'Summary',
+                    'meta_keywords' => 'person, photo',
+                    'biography' => 'Person biography',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Story',
+                        'text' => '<p>Intro text</p>',
+                        'image' => UploadedFile::fake()->image('block-image.jpg'),
+                    ],
+                ],
+            ],
+        ]);
+
+        $createResponse->assertOk();
+
+        $person = Person::query()->where('name', 'Photo Person')->firstOrFail();
+
+        $this->assertTrue($person->getFirstMediaUrl('intro_image') !== '');
+        $this->assertTrue($person->texts->first()->getFirstMediaUrl('images') !== '');
+
+        $updateResponse = $this->postJson(route('admin.persons.save', ['personId' => $person->id]), [
+            'name' => 'Photo Person',
+            'published' => true,
+            'remove_intro_image' => true,
+            'translations' => [
+                'en' => [
+                    'name' => 'Photo Person',
+                    'slug' => 'photo-person',
+                    'meta_description' => 'Summary',
+                    'meta_keywords' => 'person, photo',
+                    'biography' => 'Person biography',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Story',
+                        'text' => '<p>Intro text</p>',
+                        'remove_image' => true,
+                    ],
+                ],
+            ],
+        ]);
+
+        $updateResponse->assertOk();
+
+        $person->refresh();
+        $this->assertSame('', $person->getFirstMediaUrl('intro_image'));
+        $this->assertSame('', $person->texts->first()->getFirstMediaUrl('images'));
     }
 }

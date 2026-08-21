@@ -4,13 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Person extends Model
+class Person extends Model implements HasMedia
 {
-    use SoftDeletes;
+    use InteractsWithMedia, SoftDeletes;
 
     protected $table = 'persons';
     protected $guarded = ['id'];
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('intro_image')->singleFile();
+    }
 
     public function translations()
     {
@@ -24,11 +31,15 @@ class Person extends Model
 
     public static function getPerson(int $id)
     {
-        $person = self::with(['translations', 'texts'])->findOrFail($id);
+        $person = self::with(['translations', 'texts.media'])->findOrFail($id);
 
         if ($person) {
+            $person->intro_image_url = $person->getFirstMediaUrl('intro_image');
             $person->translations->each(function ($translation) {
                 $translation->name = $translation->name ?? '';
+            });
+            $person->texts->each(function ($text) {
+                $text->image_url = $text->getFirstMediaUrl('images');
             });
         }
 
