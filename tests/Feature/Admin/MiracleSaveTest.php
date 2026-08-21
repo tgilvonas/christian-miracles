@@ -52,6 +52,83 @@ class MiracleSaveTest extends TestCase
         ]);
     }
 
+    public function test_it_removes_intro_and_text_images_when_requested(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $miracle = $this->postJson(route('admin.miracles.save'), [
+            'happened_at' => '2025-03-12',
+            'published' => true,
+            'intro_image' => UploadedFile::fake()->image('intro.jpg'),
+            'translations' => [
+                'en' => [
+                    'name' => 'Remove image miracle',
+                    'slug' => 'remove-image-miracle',
+                    'meta_description' => 'Remove description',
+                    'meta_keywords' => 'remove, miracle',
+                    'description' => 'Remove narrative',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Text title',
+                        'text' => '<p>Initial block</p>',
+                        'image' => UploadedFile::fake()->image('block.jpg'),
+                    ],
+                ],
+            ],
+        ])->decodeResponseJson();
+
+        $miracleId = $miracle['miracle']['id'];
+
+        $this->postJson(route('admin.miracles.save', ['miracleId' => $miracleId]), [
+            'happened_at' => '2025-03-12',
+            'published' => true,
+            'remove_intro_image' => true,
+            'translations' => [
+                'en' => [
+                    'name' => 'Remove image miracle',
+                    'slug' => 'remove-image-miracle',
+                    'meta_description' => 'Remove description',
+                    'meta_keywords' => 'remove, miracle',
+                    'description' => 'Remove narrative',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Text title',
+                        'text' => '<p>Initial block</p>',
+                        'remove_image' => true,
+                    ],
+                ],
+            ],
+        ])->assertOk();
+
+        $miracle = Miracle::with(['texts'])->findOrFail($miracleId);
+
+        $this->assertSame('', $miracle->getFirstMediaUrl('intro_image'));
+        $this->assertSame('', $miracle->texts->first()->getFirstMediaUrl('images'));
+        $this->assertDatabaseMissing('media', [
+            'model_id' => $miracle->id,
+            'model_type' => Miracle::class,
+            'collection_name' => 'intro_image',
+        ]);
+        $this->assertDatabaseMissing('media', [
+            'model_id' => $miracle->texts->first()->id,
+            'model_type' => MiracleText::class,
+            'collection_name' => 'images',
+        ]);
+    }
+
     public function test_it_creates_and_updates_translations_and_text_blocks(): void
     {
         $user = User::factory()->create();

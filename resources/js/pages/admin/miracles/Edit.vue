@@ -49,6 +49,7 @@ const form = reactive({
     year_to: '',
     published: false,
     at_holy_mass: false,
+    remove_intro_image: false,
     intro_image: null as File | null,
     intro_image_url: '',
     intro_image_preview: '',
@@ -149,6 +150,7 @@ function syncForm() {
     form.year_to = miracle?.year_to;
     form.published = Boolean(miracle?.published);
     form.at_holy_mass = Boolean(miracle?.at_holy_mass);
+    form.remove_intro_image = false;
     form.intro_image = null;
     form.intro_image_preview = '';
     form.intro_image_url = miracle?.intro_image_url ?? '';
@@ -192,6 +194,7 @@ function syncForm() {
                 info_source: textItem?.info_source ?? '',
                 image_url: textItem?.image_url ?? '',
                 image_preview: '',
+                remove_image: false,
                 image: null,
             }))
             .sort((left, right) => (left.pos ?? 0) - (right.pos ?? 0));
@@ -218,6 +221,7 @@ function addTextItem(localeCode: string) {
             info_source: '',
             image_url: '',
             image_preview: '',
+            remove_image: false,
             image: null,
         },
     ];
@@ -288,6 +292,32 @@ function handleImageChange(localeCode: string, index: number, event: Event) {
         ...existingItems[index],
         image: file,
         image_preview: file ? URL.createObjectURL(file) : '',
+        image_url: file ? '' : existingItems[index]?.image_url ?? '',
+        remove_image: false,
+    };
+
+    form.texts[localeCode] = existingItems;
+}
+
+function clearTextImage(localeCode: string, index: number) {
+    const existingItems = Array.isArray(form.texts[localeCode]) ? [...form.texts[localeCode]] : [];
+
+    if (index < 0 || index >= existingItems.length) {
+        return;
+    }
+
+    const previousPreview = existingItems[index]?.image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    existingItems[index] = {
+        ...existingItems[index],
+        image: null,
+        image_preview: '',
+        image_url: '',
+        remove_image: true,
     };
 
     form.texts[localeCode] = existingItems;
@@ -302,8 +332,22 @@ function handleIntroImageChange(event: Event) {
         URL.revokeObjectURL(previousPreview);
     }
 
+    form.remove_intro_image = false;
     form.intro_image = file;
     form.intro_image_preview = file ? URL.createObjectURL(file) : '';
+}
+
+function clearIntroImage() {
+    const previousPreview = form.intro_image_preview;
+
+    if (previousPreview) {
+        URL.revokeObjectURL(previousPreview);
+    }
+
+    form.remove_intro_image = true;
+    form.intro_image = null;
+    form.intro_image_preview = '';
+    form.intro_image_url = '';
 }
 
 watch(
@@ -400,17 +444,23 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     @change="handleIntroImageChange($event)"
                                     class="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100 dark:text-gray-100"
                                 />
+                                <div v-if="form.intro_image_url || form.intro_image_preview" class="mt-3 flex items-center gap-2">
+                                    <label class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300">
+                                        <input v-model="form.remove_intro_image" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
+                                        <span>{{ trans('remove_image') }}</span>
+                                    </label>
+                                </div>
                                 <p v-if="form.intro_image?.name" class="mt-2 text-xs text-gray-500 dark:text-gray-400">
                                     Selected file: {{ form.intro_image.name }}
                                 </p>
                                 <img
-                                    v-if="form.intro_image_preview"
+                                    v-if="!form.remove_intro_image && form.intro_image_preview"
                                     :src="form.intro_image_preview"
                                     alt=""
                                     class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
                                 />
                                 <img
-                                    v-else-if="form.intro_image_url"
+                                    v-else-if="!form.remove_intro_image && form.intro_image_url"
                                     :src="form.intro_image_url"
                                     alt=""
                                     class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
@@ -574,13 +624,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                                                         Selected file: {{ textItem.image.name }}
                                                     </p>
                                                     <img
-                                                        v-if="textItem.image_preview"
+                                                        v-if="!textItem.remove_image && textItem.image_preview"
                                                         :src="textItem.image_preview"
                                                         alt=""
                                                         class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
                                                     />
                                                     <img
-                                                        v-else-if="textItem.image_url"
+                                                        v-else-if="!textItem.remove_image && textItem.image_url"
                                                         :src="textItem.image_url"
                                                         alt=""
                                                         class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"

@@ -82,7 +82,13 @@ class MiraclesController extends Controller
                 $miracle = Miracle::create($miraclePayload);
             }
 
+            $removeIntroImage = $request->boolean('remove_intro_image', false);
             $uploadedIntroImage = $request->file('intro_image');
+
+            if ($removeIntroImage) {
+                $miracle->clearMediaCollection('intro_image');
+            }
+
             if ($uploadedIntroImage) {
                 $miracle->clearMediaCollection('intro_image');
                 $miracle->addMedia($uploadedIntroImage)->toMediaCollection('intro_image');
@@ -154,7 +160,12 @@ class MiraclesController extends Controller
                         $textRecord = MiracleText::query()->create($payload);
                     }
 
+                    $removeImage = $request->boolean("texts.{$locale}.{$index}.remove_image", false);
                     $uploadedImage = $request->file("texts.{$locale}.{$index}.image");
+
+                    if ($removeImage) {
+                        $textRecord->clearMediaCollection('images');
+                    }
 
                     if ($uploadedImage) {
                         $textRecord->clearMediaCollection('images');

@@ -44,4 +44,5 @@ return [
     'image' => 'Paveikslėlis',
     'intro_image' => 'Pagrindinis paveikslėlis',
     'select_locations' => 'Pasirinkite vietoves',
+    'remove_image' => 'Pašalinti paveikslėlį',
 ];

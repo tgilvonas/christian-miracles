@@ -44,4 +44,5 @@ return [
     'image' => 'Image',
     'intro_image' => 'Intro image',
     'select_locations' => 'Select locations',
+    'remove_image' => 'Remove image',
 ];
