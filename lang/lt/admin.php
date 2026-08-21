@@ -45,4 +45,8 @@ return [
     'intro_image' => 'Pagrindinis paveikslėlis',
     'select_locations' => 'Pasirinkite vietoves',
     'remove_image' => 'Pašalinti paveikslėlį',
+    'persons' => 'Asmenys',
+    'persons_name' => 'Vardas',
+    'beatified_at' => 'Palaimintas',
+    'canonized_at' => 'Paskelbtas šventuoju',
 ];

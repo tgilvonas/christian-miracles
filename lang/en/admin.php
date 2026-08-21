@@ -45,4 +45,8 @@ return [
     'intro_image' => 'Intro image',
     'select_locations' => 'Select locations',
     'remove_image' => 'Remove image',
+    'persons' => 'Persons',
+    'persons_name' => 'Name',
+    'beatified_at' => 'Beatified at',
+    'canonized_at' => 'Canonized at',
 ];

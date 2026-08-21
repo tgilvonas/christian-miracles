@@ -32,6 +32,11 @@ const mainNavItems: NavItem[] = [
         href: route('admin.locations.index'),
         icon: LayoutGrid,
     },
+    {
+        title: trans('persons'),
+        href: route('admin.persons.index'),
+        icon: Users,
+    },
 ];
 
 const visibleMainNavItems = computed<NavItem[]>(() => {

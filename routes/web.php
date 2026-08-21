@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\LocationsController;
 use App\Http\Controllers\Admin\MiraclesController;
+use App\Http\Controllers\Admin\PersonsController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
@@ -31,6 +32,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/miracles/{miracleId}/edit', [MiraclesController::class, 'edit'])->name('admin.miracles.edit');
     Route::post('/admin/miracles/save/{miracleId?}', [MiraclesController::class, 'save'])->name('admin.miracles.save');
     Route::delete('/admin/miracles/{miracleId}', [MiraclesController::class, 'delete'])->name('admin.miracles.delete');
+
+    Route::get('/admin/persons', [PersonsController::class, 'index'])->name('admin.persons.index');
+    Route::get('/admin/persons/json-list', [PersonsController::class, 'getJsonList'])->name('admin.persons.json_list');
+    Route::get('/admin/persons/{personId}/edit', [PersonsController::class, 'edit'])->name('admin.persons.edit');
+    Route::post('/admin/persons/save/{personId?}', [PersonsController::class, 'save'])->name('admin.persons.save');
+    Route::delete('/admin/persons/{personId}', [PersonsController::class, 'delete'])->name('admin.persons.delete');
 
     Route::get('/admin/users', [UsersController::class, 'index'])->name('admin.users.index');
     Route::get('/admin/users/json-list', [UsersController::class, 'jsonList'])->name('admin.users.json_list');
