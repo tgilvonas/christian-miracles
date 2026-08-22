@@ -181,10 +181,17 @@ class MiraclesController extends Controller
             return $miracle;
         });
 
-        return response()->json([
-            'message' => __('admin.record_saved_successfully'),
-            'miracle' => Miracle::getMiracle($miracle->id),
-        ]);
+        $redirectRoute = route('admin.miracles.edit', ['miracleId' => $miracle->id]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'redirect' => $redirectRoute,
+                'success' => __('admin.record_saved_successfully'),
+            ]);
+        }
+
+        return redirect()->route('admin.miracles.edit', ['miracleId' => $miracle->id])
+            ->with('success', __('admin.record_saved_successfully'));
     }
 
     public function delete($miracleId)

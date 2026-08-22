@@ -177,10 +177,17 @@ class PersonsController extends Controller
             return $person;
         });
 
-        return response()->json([
-            'message' => __('admin.record_saved_successfully'),
-            'person' => Person::getPerson($person->id),
-        ]);
+        $redirectRoute = route('admin.persons.edit', ['personId' => $person->id]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'redirect' => $redirectRoute,
+                'success' => __('admin.record_saved_successfully'),
+            ]);
+        }
+
+        return redirect()->route('admin.persons.edit', ['personId' => $person->id])
+            ->with('success', __('admin.record_saved_successfully'));
     }
 
     public function delete($personId)

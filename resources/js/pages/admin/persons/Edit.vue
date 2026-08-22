@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
+import FlashMessageAfterReload from '@/components/FlashMessageAfterReload.vue';
 import Tabs from '@/components/Tabs.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
@@ -9,7 +10,7 @@ import { type BreadcrumbItem } from '@/types';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 import axios from 'axios';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch, onMounted } from 'vue';
 import { route } from 'ziggy-js';
 import state from '@/state.js';
 
@@ -308,6 +309,21 @@ watch(
 
 watch(localeEntries, syncForm, { deep: true, immediate: true });
 
+onMounted(() => {
+    console.log(page.props.flash);
+
+    // If server returned no flash in Inertia props but controller provided
+    // a JSON response for AJAX, the client stores the message in
+    // localStorage before navigating. Read it here and show the reload flash.
+    const stored = localStorage.getItem('inertia_flash_success');
+
+    if (!page.props.flash?.success && stored) {
+        reloadFlashMessage.value = stored;
+        reloadFlash.value = true;
+        localStorage.removeItem('inertia_flash_success');
+    }
+});
+
 function submit() {
     const currentPersonId = personState.value?.id ?? props.person?.id;
     const saveRoute = currentPersonId
@@ -316,21 +332,36 @@ function submit() {
 
     axios.post(saveRoute, buildFormData(form))
         .then((response) => {
-            const nextPerson = response.data?.person ?? personState.value;
+            // If controller returned JSON with redirect and success (for AJAX),
+            // persist success to localStorage and navigate to the redirect URL.
+            if (response.data && response.data.redirect) {
+                if (response.data.success) {
+                    try {
+                        localStorage.setItem('inertia_flash_success', response.data.success);
+                    } catch (e) {
+                        // ignore storage errors
+                    }
+                }
 
-            if (nextPerson) {
-                personState.value = nextPerson;
+                window.location.href = response.data.redirect;
+                return;
             }
 
-            syncForm();
-            state.flashSuccessMessage({
-                message: response.data?.message || trans('record_saved_successfully'),
-            });
+            const redirectUrl = response.request?.responseURL || null;
+
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                window.location.reload();
+            }
         })
         .catch(() => {
             state.flashErrorMessage({ message: trans('error') });
         });
 }
+
+const reloadFlash = ref(false);
+const reloadFlashMessage = ref('');
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -344,7 +375,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head :title="trans('persons')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
-            <FlashMessage type="success" />
+            <FlashMessageAfterReload
+                :show="reloadFlash || !!page.props.flash?.success"
+                :message="reloadFlash ? reloadFlashMessage : page.props.flash?.success"
+                :type="'success'"
+                :duration="5000"
+            />
             <FlashMessage type="error" />
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                 <form class="space-y-6" @submit.prevent="submit">

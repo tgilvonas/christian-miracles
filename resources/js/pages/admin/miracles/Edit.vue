@@ -2,6 +2,7 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
+import FlashMessageAfterReload from '@/components/FlashMessageAfterReload.vue';
 import Tabs from '@/components/Tabs.vue';
 import VueSelect from '@/components/VueSelect.vue';
 import { Head, usePage } from '@inertiajs/vue3';
@@ -10,7 +11,7 @@ import { type BreadcrumbItem } from '@/types';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { Ckeditor } from '@ckeditor/ckeditor5-vue';
 import axios from 'axios';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref, watch, onMounted } from 'vue';
 import { route } from 'ziggy-js';
 import state from '@/state.js';
 
@@ -22,6 +23,8 @@ const miracleState = ref<Record<string, any> | undefined>(props.miracle);
 const page = usePage();
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
 const availableLocations = ref<Array<{ value: number; label: string }>>([]);
+const reloadFlash = ref(false);
+const reloadFlashMessage = ref('');
 const ckeditor = Ckeditor;
 const editorCtor: any = ClassicEditor;
 const editorConfig: any = {
@@ -364,6 +367,16 @@ watch(localeEntries, syncForm, { deep: true, immediate: true });
 
 loadLocations();
 
+onMounted(() => {
+    const stored = localStorage.getItem('inertia_flash_success');
+
+    if (!page.props.flash?.success && stored) {
+        reloadFlashMessage.value = stored;
+        reloadFlash.value = true;
+        localStorage.removeItem('inertia_flash_success');
+    }
+});
+
 function submit() {
     const currentMiracleId = miracleState.value?.id ?? props.miracle?.id;
     const saveRoute = currentMiracleId
@@ -372,16 +385,26 @@ function submit() {
 
     axios.post(saveRoute, buildFormData(form))
         .then((response) => {
-            const nextMiracle = response.data?.miracle ?? miracleState.value;
+            if (response.data && response.data.redirect) {
+                if (response.data.success) {
+                    try {
+                        localStorage.setItem('inertia_flash_success', response.data.success);
+                    } catch (e) {
+                        // ignore storage errors
+                    }
+                }
 
-            if (nextMiracle) {
-                miracleState.value = nextMiracle;
+                window.location.href = response.data.redirect;
+                return;
             }
 
-            syncForm();
-            state.flashSuccessMessage({
-                message: response.data?.message || trans('record_saved_successfully'),
-            });
+            const redirectUrl = response.request?.responseURL || null;
+
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                window.location.reload();
+            }
         })
         .catch(() => {
             state.flashErrorMessage({ message: trans('error') });
@@ -400,7 +423,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head :title="trans('miracles')" />
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-3">
-            <FlashMessage type="success" />
+            <FlashMessageAfterReload
+                :show="reloadFlash || !!page.props.flash?.success"
+                :message="reloadFlash ? reloadFlashMessage : page.props.flash?.success"
+                :type="'success'"
+                :duration="5000"
+            />
             <FlashMessage type="error" />
             <div class="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
                 <form class="space-y-6" @submit.prevent="submit">
