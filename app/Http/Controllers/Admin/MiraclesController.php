@@ -66,8 +66,8 @@ class MiraclesController extends Controller
         $miraclePayload = [
             'happened_at' => $request->input('happened_at'),
             'year_to' => $request->input('year_to', null),
-            'published' => (int) (bool) $request->input('published'),
-            'at_holy_mass' => (int) (bool) $request->input('at_holy_mass', false),
+            'published' => $request->boolean('published', false) ? 1 : 0,
+            'at_holy_mass' => $request->boolean('at_holy_mass', false) ? 1 : 0,
         ];
 
         $translationsData = $request->input('translations', []);

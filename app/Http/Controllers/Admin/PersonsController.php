@@ -68,7 +68,7 @@ class PersonsController extends Controller
             'name' => $request->input('name'),
             'beatified_at' => $request->input('beatified_at') ?: null,
             'canonized_at' => $request->input('canonized_at') ?: null,
-            'published' => (int) (bool) $request->input('published'),
+            'published' => $request->boolean('published', false) ? 1 : 0,
         ];
 
         $translationsData = $request->input('translations', []);

@@ -21,6 +21,8 @@ const props = defineProps<{
 
 const personState = ref<Record<string, any> | undefined>(props.person);
 const page = usePage();
+const currentUser = computed(() => (page.props.auth as { user?: { roles?: string[] } }).user ?? undefined);
+const canManagePublished = computed(() => (currentUser.value?.roles ?? []).includes('ROLE_SUPERADMIN'));
 const localeEntries = computed(() => Object.entries(page.props.locales ?? {}));
 const ckeditor = Ckeditor;
 const editorCtor: any = ClassicEditor;
@@ -457,7 +459,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </div>
 
                         <div class="md:col-span-2">
-                            <label class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+                            <label v-if="canManagePublished" class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200">
                                 <input v-model="form.published" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
                                 <span>{{ trans('published') }}</span>
                             </label>
