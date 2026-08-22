@@ -29,9 +29,14 @@ class Person extends Model implements HasMedia
         return $this->hasMany(PersonText::class, 'person_id', 'id');
     }
 
+    public function locations()
+    {
+        return $this->belongsToMany(Location::class, 'persons_locations', 'person_id', 'location_id');
+    }
+
     public static function getPerson(int $id)
     {
-        $person = self::with(['translations', 'texts.media'])->findOrFail($id);
+        $person = self::with(['translations', 'texts.media', 'locations'])->findOrFail($id);
 
         if ($person) {
             $person->intro_image_url = $person->getFirstMediaUrl('intro_image');

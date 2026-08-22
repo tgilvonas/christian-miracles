@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import Button from '@/components/Button.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
 import FlashMessageAfterReload from '@/components/FlashMessageAfterReload.vue';
+import VueSelect from '@/components/VueSelect.vue';
 import Tabs from '@/components/Tabs.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { trans } from '@/helpers/translator';
@@ -55,6 +56,7 @@ const form = reactive({
     intro_image_preview: '',
     translations: {} as Record<string, Record<string, string>>,
     texts: {} as Record<string, Array<Record<string, any>>>,
+    locations: [] as Array<number>,
 });
 
 function buildFormData(payload: Record<string, any>) {
@@ -167,7 +169,46 @@ function syncForm() {
 
     form.translations = nextTranslations;
     form.texts = nextTexts;
+        form.locations = Array.isArray(person?.locations)
+            ? person.locations.map((location: Record<string, any>) => Number(location?.id ?? location?.location_id ?? 0)).filter(Boolean)
+            : [];
 }
+
+    const availableLocations = ref<Array<{ value: number; label: string }>>([]);
+
+    function getLocationLabel(location: Record<string, any>) {
+        const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
+        const shortLocale = localeCode.split('_')[0];
+
+        if (location?.[`name_${localeCode}`]) {
+            return location[`name_${localeCode}`];
+        }
+
+        if (location?.[`name_${shortLocale}`]) {
+            return location[`name_${shortLocale}`];
+        }
+
+        if (location?.name) {
+            return location.name;
+        }
+
+        return `Location #${location?.id ?? '-'}`;
+    }
+
+    function loadLocations() {
+        axios.get(route('admin.locations.json_list'), {
+            params: {
+                paginate_by: 9999,
+            },
+        }).then((response) => {
+            availableLocations.value = (response.data?.data ?? response.data ?? []).map((location: Record<string, any>) => ({
+                value: Number(location.id),
+                label: getLocationLabel(location),
+            }));
+        }).catch((error) => {
+            console.error('Unable to load locations', error);
+        });
+    }
 
 function addTextItem(localeCode: string) {
     const existingItems = Array.isArray(form.texts[localeCode]) ? form.texts[localeCode] : [];
@@ -312,9 +353,6 @@ watch(localeEntries, syncForm, { deep: true, immediate: true });
 onMounted(() => {
     console.log(page.props.flash);
 
-    // If server returned no flash in Inertia props but controller provided
-    // a JSON response for AJAX, the client stores the message in
-    // localStorage before navigating. Read it here and show the reload flash.
     const stored = localStorage.getItem('inertia_flash_success');
 
     if (!page.props.flash?.success && stored) {
@@ -322,6 +360,7 @@ onMounted(() => {
         reloadFlash.value = true;
         localStorage.removeItem('inertia_flash_success');
     }
+    loadLocations();
 });
 
 function submit() {
@@ -332,8 +371,6 @@ function submit() {
 
     axios.post(saveRoute, buildFormData(form))
         .then((response) => {
-            // If controller returned JSON with redirect and success (for AJAX),
-            // persist success to localStorage and navigate to the redirect URL.
             if (response.data && response.data.redirect) {
                 if (response.data.success) {
                     try {
@@ -457,6 +494,16 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 alt=""
                                 class="mt-2 max-h-40 w-full object-contain object-left rounded border border-gray-200 dark:border-gray-700"
                             />
+                            <div class="mt-4">
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ trans('locations') }}
+                                </label>
+                                <VueSelect
+                                    v-model="form.locations"
+                                    :options="availableLocations"
+                                    :placeholder="trans('select_locations')"
+                                />
+                            </div>
                         </div>
                     </div>
 

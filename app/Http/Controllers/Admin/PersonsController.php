@@ -54,6 +54,7 @@ class PersonsController extends Controller
             $person = new Person();
             $person->translations = [];
             $person->texts = [];
+            $person->locations = [];
         }
 
         return Inertia::render('admin/persons/Edit', [
@@ -173,6 +174,9 @@ class PersonsController extends Controller
                     $textRecord->delete();
                 });
             }
+
+            $locationIds = array_values(array_filter(array_map('intval', (array) $request->input('locations', []))));
+            $person->locations()->sync($locationIds);
 
             return $person;
         });
