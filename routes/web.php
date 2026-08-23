@@ -4,20 +4,22 @@ use App\Http\Controllers\Admin\LocationsController;
 use App\Http\Controllers\Admin\MiraclesController;
 use App\Http\Controllers\Admin\PersonsController;
 use App\Http\Controllers\Admin\UsersController;
+use App\Http\Controllers\Frontend\MiraclesController as FrontendMiraclesController;
+use App\Http\Controllers\Frontend\SaintsController as FrontendSaintsController;
 use App\Http\Controllers\LocaleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
+Route::get('/', [FrontendMiraclesController::class, 'index'])->name('home');
+Route::get('/sventieji', [FrontendSaintsController::class, 'index'])->name('saints_index_lt');
+Route::get('/saints', [FrontendSaintsController::class, 'index'])->name('saints_index_en');
 
 Route::post('/locale', [LocaleController::class, 'setLocale'])->name('locale.set');
 Route::get('/get-locale', [LocaleController::class, 'getLocale'])->name('locale.get');
 
 Route::get('dashboard', function () {
     return Inertia::render('admin/Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/admin/locations', [LocationsController::class, 'index'])->name('admin.locations.index');
