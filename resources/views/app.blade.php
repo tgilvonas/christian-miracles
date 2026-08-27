@@ -41,9 +41,17 @@
 
         @routes
 
-        <script>
-            window.translations = @json(__('admin'));
+        @if(request()->is('admin', 'admin/*'))
+            <script>
+                window.translations = @json(__('admin'));
+            </script>
         </script>
+        @else
+            <script>
+                window.translations = @json(__('frontend'));
+            </script>
+        @endif
+        
 
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         @inertiaHead
