@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', [FrontendMiraclesController::class, 'index'])->name('home');
+Route::get('/miracles/json', [FrontendMiraclesController::class, 'getJsonList'])->name('miracles.json_list');
 Route::get('/sventieji', [FrontendSaintsController::class, 'index'])->name('saints_index_lt');
 Route::get('/saints', [FrontendSaintsController::class, 'index'])->name('saints_index_en');
 

@@ -1,5 +1,19 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
+import { ref, onMounted } from 'vue';
+
+const miracles = ref<any[]>([]);
+
+onMounted(async () => {
+    try {
+        const res = await fetch('/miracles/json');
+        if (res.ok) {
+            miracles.value = await res.json();
+        }
+    } catch (e) {
+        // ignore for now
+    }
+});
 </script>
 
 <template>
@@ -11,8 +25,16 @@ import { Head, Link } from '@inertiajs/vue3';
         </header>
         <div class="flex w-full items-center justify-center">
             <main class="w-full max-w-[1800px]">
-                <h1 class="mb-1 text-2xl mb-2">Krikščionių šventųjų ir jų stebuklų svetainė</h1>
-                <p class="text-lg">Vyksta kūrimo darbai</p>
+                <section class="grid gap-2">
+                    <div v-if="!miracles.length">Loading...</div>
+                    <article v-for="m in miracles" :key="m.id" class="flex items-center gap-4 rounded bg-white p-4 shadow dark:bg-[#111111]">
+                        <img v-if="m.intro_image_url" :src="m.intro_image_url" alt="" class="h-24 w-24 object-cover" />
+                        <div>
+                            <h2 class="text-xl font-semibold">{{ m.title ?? m.name }}</h2>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ m.happened_at }}</p>
+                        </div>
+                    </article>
+                </section>
             </main>
         </div>
     </div>
