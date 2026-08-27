@@ -4,6 +4,8 @@ import { ref, onMounted } from 'vue';
 
 const miracles = ref<any[]>([]);
 
+const joinNames = (arr: any[] | undefined) => (arr && arr.length) ? arr.map(a => a.name).join(', ') : '';
+
 onMounted(async () => {
     try {
         const res = await fetch('/miracles/json');
@@ -28,10 +30,11 @@ onMounted(async () => {
                 <section class="grid gap-2">
                     <div v-if="!miracles.length">Loading...</div>
                     <article v-for="m in miracles" :key="m.id" class="flex items-center gap-4 rounded bg-white p-4 shadow dark:bg-[#111111]">
-                        <img v-if="m.intro_image_url" :src="m.intro_image_url" alt="" class="h-24 w-24 object-cover" />
+                        <img v-if="m.intro_image_url" :src="m.intro_image_url" alt="" class="max-h-[10rem] max-w-[10rem]" />
                         <div>
                             <h2 class="text-xl font-semibold">{{ m.title ?? m.name }}</h2>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ m.happened_at }}</p>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">{{ m.happened_at }}</div>
+                            <div class="text-sm text-gray-700 dark:text-gray-400">{{ joinNames(m.locations) }}</div>
                         </div>
                     </article>
                 </section>

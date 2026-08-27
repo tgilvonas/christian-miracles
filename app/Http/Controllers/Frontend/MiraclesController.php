@@ -33,6 +33,14 @@ class MiraclesController extends Controller
                     'title' => $translation->name ?? null,
                     'happened_at' => $m->happened_at,
                     'intro_image_url' => $m->intro_image_url,
+                    'locations' => $m->locations->map(function ($loc) use ($locale) {
+                        $lt = $loc->translations->firstWhere('lang', $locale) ?: $loc->translations->first();
+                        return [
+                            'id' => $loc->id,
+                            'name' => $lt->name ?? null,
+                            'slug' => $lt->slug ?? null,
+                        ];
+                    })->values(),
                 ];
             });
 
