@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import WebsiteHeader from '@/components/WebsiteHeader.vue';
+import { Link, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { ref, onMounted, computed } from 'vue';
 
@@ -32,11 +33,7 @@ onMounted(async () => {
 
 <template>
     <div class="flex min-h-screen flex-col bg-[#dddddd] p-6 dark:text-[#ffffff] lg:p-8 dark:bg-[#000000]">
-        <header class="mb-6 w-full max-w-[1800px] mx-auto text-sm not-has-[nav]:hidden">
-            <nav class="flex items-center justify gap-4">
-                <img src="/images/logo-lt.png" alt="Logo" class="max-h-[6rem]" />
-            </nav>
-        </header>
+        <WebsiteHeader />
         <div class="flex w-full items-center justify-center">
             <main class="w-full max-w-[1800px] mx-auto">
                 <section class="grid gap-2">

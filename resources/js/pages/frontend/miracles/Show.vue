@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
+import WebsiteHeader from '@/components/WebsiteHeader.vue';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -42,15 +43,9 @@ const textSections = computed(() => props.miracle?.texts ?? []);
     <Head :title="miracleTitle" />
 
     <div class="flex min-h-screen flex-col bg-[#dddddd] p-6 text-[#111111] dark:bg-[#000000] dark:text-[#ffffff] lg:p-8">
-        <header class="mx-auto mb-6 w-full max-w-[1200px]">
-            <nav class="flex items-center justify-between gap-4">
-                <Link href="/" class="inline-flex items-center gap-3">
-                    <img src="/images/logo-lt.png" alt="Logo" class="max-h-[6rem]" />
-                </Link>
-            </nav>
-        </header>
+        <WebsiteHeader />
 
-        <main class="mx-auto w-full max-w-[1200px]">
+        <main class="mx-auto w-full max-w-[1800px]">
             <article class="overflow-hidden rounded bg-white shadow dark:bg-[#111111]">
                 <div v-if="props.miracle?.intro_image_url" class="border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-[#0c0c0c]">
                     <img :src="props.miracle.intro_image_url" :alt="miracleTitle" class="h-[320px] w-full object-cover" />
