@@ -12,6 +12,8 @@ use Inertia\Inertia;
 
 Route::get('/', [FrontendMiraclesController::class, 'index'])->name('home');
 Route::get('/miracles/json', [FrontendMiraclesController::class, 'getJsonList'])->name('miracles.json_list');
+Route::get('/miracles/{slug}', [FrontendMiraclesController::class, 'show'])->name('miracles.show_en');
+Route::get('/stebuklai/{slug}', [FrontendMiraclesController::class, 'show'])->name('miracles.show_lt');
 Route::get('/sventieji', [FrontendSaintsController::class, 'index'])->name('saints_index_lt');
 Route::get('/saints', [FrontendSaintsController::class, 'index'])->name('saints_index_en');
 

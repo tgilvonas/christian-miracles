@@ -11,14 +11,14 @@ class MiraclesController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Miracles');
+        return Inertia::render('frontend/miracles/Index');
     }
 
     public function getJsonList(Request $request)
     {
         $locale = app()->getLocale();
 
-        $miracles = Miracle::with(['translations', 'texts', 'locations'])
+        $miracles = Miracle::with(['translations', 'texts', 'locations.translations', 'media'])
             ->where('published', 1)
             ->orderBy('happened_at', 'desc')
             ->get()
@@ -31,6 +31,7 @@ class MiraclesController extends Controller
                     'id' => $m->id,
                     'name' => $m->name,
                     'title' => $translation->name ?? null,
+                    'slug' => $translation->slug ?? null,
                     'happened_at' => $m->happened_at,
                     'intro_image_url' => $m->intro_image_url,
                     'locations' => $m->locations->map(function ($loc) use ($locale) {
@@ -45,5 +46,22 @@ class MiraclesController extends Controller
             });
 
         return response()->json($miracles);
+    }
+
+    public function show(string $slug)
+    {
+        $locale = app()->getLocale();
+
+        $miracle = Miracle::with(['translations', 'texts.media', 'locations.translations', 'media'])
+            ->whereHas('translations', function ($query) use ($slug, $locale) {
+                $query->where('slug', $slug)->where('lang', $locale);
+            })
+            ->firstOrFail();
+
+        $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
+
+        return Inertia::render('frontend/miracles/Show', [
+            'miracle' => $miracle,
+        ]);
     }
 }
