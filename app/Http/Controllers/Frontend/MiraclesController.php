@@ -26,19 +26,25 @@ class MiraclesController extends Controller
     {
         $locale = app()->getLocale();
 
-        $miracle = Miracle::with(['translations', 'texts.media', 'locations.translations', 'media'])
+        $miracle = Miracle::with([
+            'translations',
+            'texts'  => function ($query) use ($locale) {
+                $query->where('lang', $locale);
+            },
+            'texts.media', 
+            'locations.translations', 
+            'media'
+            ])
             ->whereHas('translations', function ($query) use ($slug, $locale) {
                 $query->where('slug', $slug)->where('lang', $locale);
             })
             ->firstOrFail();
 
         $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
-        $miracle->texts = $miracle->texts
-            ->where('lang', $locale)
-            ->values()
-            ->each(function ($text) {
-                $text->image_url = $text->getFirstMediaUrl('images');
-            });
+        
+        $miracle->texts->each(function ($text) {
+            $text->image_url = $text->getFirstMediaUrl('images');
+        });
 
         return Inertia::render('frontend/miracles/Show', [
             'miracle' => $miracle,
