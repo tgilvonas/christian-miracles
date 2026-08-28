@@ -72,15 +72,14 @@ const textSections = computed(() => props.miracle?.texts ?? []);
                         <section v-for="section in textSections" :key="section.id" class="space-y-3">
                             <h2 v-if="section.title" class="text-2xl font-semibold">{{ section.title }}</h2>
 
-                            <div v-if="section.image_url" class="overflow-hidden rounded border border-gray-200 dark:border-gray-700">
-                                <img :src="section.image_url" :alt="section.image_alt || section.title || miracleTitle" class="max-h-[420px] w-full object-cover" />
-                            </div>
+                            <img :src="section.image_url" :alt="section.image_alt || section.title || miracleTitle" class="max-w-[300px] object-cover float-left mr-3 mb-3" v-if="section.image_url" />
 
                             <div
                                 v-if="section.text"
                                 class="prose prose-sm max-w-none leading-relaxed text-gray-700 dark:prose-invert dark:text-gray-200"
                                 v-html="section.text"
                             />
+                            <div class="clear-both"></div>
                         </section>
                     </div>
                 </div>
