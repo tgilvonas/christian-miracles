@@ -53,9 +53,6 @@ const textSections = computed(() => props.miracle?.texts ?? []);
 
                 <div class="space-y-6 p-6 md:p-8">
                     <div class="space-y-3">
-                        <div class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400">
-                            Miracle
-                        </div>
                         <h1 class="text-3xl font-bold md:text-5xl">{{ miracleTitle }}</h1>
                         <div v-if="props.miracle?.happened_at" class="text-sm text-gray-600 dark:text-gray-400">
                             {{ props.miracle.happened_at }}

@@ -33,6 +33,12 @@ class MiraclesController extends Controller
             ->firstOrFail();
 
         $miracle->intro_image_url = $miracle->getFirstMediaUrl('intro_image');
+        $miracle->texts = $miracle->texts
+            ->where('lang', $locale)
+            ->values()
+            ->each(function ($text) {
+                $text->image_url = $text->getFirstMediaUrl('images');
+            });
 
         return Inertia::render('frontend/miracles/Show', [
             'miracle' => $miracle,
