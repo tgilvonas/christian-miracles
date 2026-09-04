@@ -63,12 +63,28 @@ watch([search, selectedLocation], () => {
             <main class="w-full max-w-[1800px] mx-auto">
                 <div class="mb-4">
                     <div class="flex gap-2">
-                        <input v-model="search" type="search" :placeholder="trans('search')" class="w-full rounded border px-3 py-2" />
-                        <select v-model="selectedLocation" class="rounded border px-3 py-2">
+                        <input
+                            v-model="search"
+                            type="search"
+                            :placeholder="trans('search')"
+                            class="w-full rounded border px-3 py-2 bg-white text-gray-900 placeholder-gray-500 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 dark:bg-[#0b0b0b] dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-blue-600"
+                        />
+
+                        <select
+                            v-model="selectedLocation"
+                            class="rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700"
+                        >
                             <option :value="null">{{ trans('all_locations') }}</option>
                             <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
                         </select>
-                        <button v-if="(search || selectedLocation)" @click="(search=''), (selectedLocation=null), fetchMiracles()" class="rounded bg-gray-200 px-3">{{ trans('clear') }}</button>
+
+                        <button
+                            v-if="(search || selectedLocation)"
+                            @click="(search=''), (selectedLocation=null), fetchMiracles()"
+                            class="rounded px-3 bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 hover:dark:bg-gray-700"
+                        >
+                            {{ trans('clear') }}
+                        </button>
                     </div>
                 </div>
 
@@ -79,14 +95,14 @@ watch([search, selectedLocation], () => {
                         v-for="m in miracles"
                         :key="m.id"
                         :href="miracleHref(m)"
-                        class="block rounded bg-white p-4 shadow transition hover:opacity-90 dark:bg-[#111111]"
+                        class="block rounded bg-white p-4 shadow transition hover:opacity-95 dark:bg-[#0f1115] text-gray-900 dark:text-gray-100 border border-transparent dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-[#0b0b0b]"
                     >
                         <article class="flex items-center gap-4">
-                            <img v-if="m.intro_image_url" :src="m.intro_image_url" alt="" class="max-h-[10rem] max-w-[10rem]" />
+                            <img v-if="m.intro_image_url" :src="m.intro_image_url" alt="" class="max-h-[10rem] max-w-[10rem] object-cover rounded bg-gray-100 dark:bg-gray-800" />
                             <div>
-                                <h2 class="text-xl font-semibold">{{ m.title ?? m.name }}</h2>
+                                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">{{ m.title ?? m.name }}</h2>
                                 <div class="text-sm text-gray-600 dark:text-gray-400">{{ m.happened_at }}</div>
-                                <div class="text-sm text-gray-700 dark:text-gray-400">{{ joinNames(m.locations) }}</div>
+                                <div class="text-sm text-gray-700 dark:text-gray-300">{{ joinNames(m.locations) }}</div>
                             </div>
                         </article>
                     </Link>
