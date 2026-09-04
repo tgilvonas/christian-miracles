@@ -23,14 +23,16 @@ class MiraclesController extends Controller
 
         $miracles = MiraclesRepository::getFilteredList($q, $locationId);
 
-        $locale = app()->getLocale();
-        $locations = Location::with('translations')->orderBy('id')
-            ->get()
-            ->map(function ($loc) use ($locale) {
-                $lt = $loc->translations->firstWhere('lang', $locale) ?: $loc->translations->first();
+        $locations = collect($miracles)
+            ->flatMap(function ($m) {
+                return $m['locations'] ?? [];
+            })
+            ->unique('id')
+            ->values()
+            ->map(function ($loc) {
                 return [
-                    'id' => $loc->id,
-                    'name' => $lt->name ?? $loc->name ?? null,
+                    'id' => $loc['id'],
+                    'name' => $loc['name'] ?? null,
                 ];
             });
 

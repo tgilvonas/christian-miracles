@@ -3,6 +3,7 @@ import WebsiteHeader from '@/components/WebsiteHeader.vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import { route } from 'ziggy-js';
 import { ref, onMounted, computed, watch } from 'vue';
+import { trans } from '@/helpers/translator';
 
 const page = usePage();
 const miracles = ref<any[]>([]);
@@ -62,12 +63,12 @@ watch([search, selectedLocation], () => {
             <main class="w-full max-w-[1800px] mx-auto">
                 <div class="mb-4">
                     <div class="flex gap-2">
-                        <input v-model="search" type="search" placeholder="Search miracles..." class="w-full rounded border px-3 py-2" />
+                        <input v-model="search" type="search" :placeholder="trans('search')" class="w-full rounded border px-3 py-2" />
                         <select v-model="selectedLocation" class="rounded border px-3 py-2">
-                            <option :value="null">All locations</option>
+                            <option :value="null">{{ trans('all_locations') }}</option>
                             <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
                         </select>
-                        <button v-if="(search || selectedLocation)" @click="(search=''), (selectedLocation=null), fetchMiracles()" class="rounded bg-gray-200 px-3">Clear</button>
+                        <button v-if="(search || selectedLocation)" @click="(search=''), (selectedLocation=null), fetchMiracles()" class="rounded bg-gray-200 px-3">{{ trans('clear') }}</button>
                     </div>
                 </div>
 
