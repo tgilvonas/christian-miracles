@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Miracle;
+use App\Models\Location;
 use App\Repositories\MiraclesRepository;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,9 +18,26 @@ class MiraclesController extends Controller
 
     public function getJsonList(Request $request)
     {
-        $miracles = MiraclesRepository::getFilteredList();
+        $q = $request->query('q');
+        $locationId = $request->query('location_id');
 
-        return response()->json($miracles);
+        $miracles = MiraclesRepository::getFilteredList($q, $locationId);
+
+        $locale = app()->getLocale();
+        $locations = Location::with('translations')->orderBy('id')
+            ->get()
+            ->map(function ($loc) use ($locale) {
+                $lt = $loc->translations->firstWhere('lang', $locale) ?: $loc->translations->first();
+                return [
+                    'id' => $loc->id,
+                    'name' => $lt->name ?? $loc->name ?? null,
+                ];
+            });
+
+        return response()->json([
+            'miracles' => $miracles,
+            'locations' => $locations,
+        ]);
     }
 
     public function show(string $slug)

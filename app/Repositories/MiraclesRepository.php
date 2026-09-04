@@ -6,13 +6,33 @@ use App\Models\Miracle;
 
 class MiraclesRepository
 {
-    public static function getFilteredList()
+    public static function getFilteredList($search = null, $locationId = null)
     {
         $locale = app()->getLocale();
 
-        $miracles = Miracle::with(['translations', 'texts', 'locations.translations', 'media'])
-            ->where('published', 1)
-            ->orderBy('happened_at', 'desc')
+        $builder = Miracle::with(['translations', 'texts', 'locations.translations', 'media'])
+            ->where('published', 1);
+
+        if (!empty($locationId)) {
+            $builder->whereHas('locations', function ($q) use ($locationId) {
+                $q->where('id', $locationId);
+            });
+        }
+
+        if (!empty($search)) {
+            $s = trim($search);
+            $builder->where(function ($q) use ($s) {
+                $q->where('name', 'like', "%{$s}%")
+                    ->orWhereHas('translations', function ($t) use ($s) {
+                        $t->where('name', 'like', "%{$s}%")->orWhere('description', 'like', "%{$s}%");
+                    })
+                    ->orWhereHas('texts', function ($t2) use ($s) {
+                        $t2->where('text', 'like', "%{$s}%");
+                    });
+            });
+        }
+
+        $miracles = $builder->orderBy('happened_at', 'desc')
             ->get()
             ->map(function ($m) use ($locale) {
                 $m->intro_image_url = $m->getFirstMediaUrl('intro_image');
