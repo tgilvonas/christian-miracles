@@ -2,6 +2,7 @@
 import WebsiteHeader from '@/components/WebsiteHeader.vue';
 import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { trans } from '@/helpers/translator';
 
 const props = defineProps<{
     miracle: any;
@@ -37,6 +38,40 @@ const locationNames = computed(() => {
 const miracleTitle = computed(() => translation.value?.name ?? props.miracle?.name ?? 'Miracle');
 const miracleDescription = computed(() => translation.value?.description ?? '');
 const textSections = computed(() => props.miracle?.texts ?? []);
+
+const escapeAttr = (value: any) => {
+    return String(value ?? '')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '')
+        .replace(/>/g, '')
+        .trim();
+};
+
+const formatSectionHtml = (section: any) => {
+    const base = section?.text ?? '';
+    const raw = section?.info_source ?? null;
+
+    let sources: string[] = [];
+    if (Array.isArray(raw)) {
+        sources = raw.map((s: any) => String(s).trim()).filter(Boolean);
+    } else if (typeof raw === 'string' && raw.trim()) {
+        sources = raw.split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean);
+    }
+
+    if (!sources.length) return base;
+
+    const sourceLabel = trans('source');
+
+    const links = sources
+        .map((s: string, idx: number) => {
+            const href = escapeAttr(s);
+            return `<a href="${href}" target="_blank" rel="noopener noreferrer">[${sourceLabel}: ${href}]</a>`;
+        })
+        .join(' ');
+
+    return `${base} ${links}`;
+};
 </script>
 
 <template>
@@ -77,7 +112,7 @@ const textSections = computed(() => props.miracle?.texts ?? []);
                             <div
                                 v-if="section.text"
                                 class="prose prose-sm max-w-none leading-relaxed text-gray-700 dark:prose-invert dark:text-gray-200"
-                                v-html="section.text"
+                                v-html="formatSectionHtml(section)"
                             />
                             <div class="clear-both"></div>
                         </section>
