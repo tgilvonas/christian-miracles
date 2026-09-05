@@ -5,4 +5,6 @@ return [
     'search' => 'Paieška',
     'all_locations' => 'Visos vietovės',
     'clear' => 'Išvalyti',
+    'saints' => 'Šventieji',
+    'miracles' => 'Stebuklai',
 ];
