@@ -23,9 +23,6 @@ class PersonsRepository
             $s = trim($search);
             $builder->where(function ($q) use ($s) {
                 $q->where('name', 'like', "%{$s}%")
-                    ->orWhereHas('translations', function ($t) use ($s) {
-                        $t->where('name', 'like', "%{$s}%")->orWhere('description', 'like', "%{$s}%");
-                    })
                     ->orWhereHas('texts', function ($t2) use ($s) {
                         $t2->where('text', 'like', "%{$s}%");
                     });
