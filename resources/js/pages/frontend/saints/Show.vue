@@ -1,0 +1,124 @@
+<script setup lang="ts">
+import WebsiteHeader from '@/components/WebsiteHeader.vue';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { trans } from '@/helpers/translator';
+
+const props = defineProps<{
+    person: any;
+}>();
+
+const page = usePage();
+
+const currentLocale = computed(() => String(page.props.currentLocale ?? 'en').toLowerCase());
+
+const translation = computed(() => {
+    const items = props.person?.translations ?? [];
+    return (
+        items.find((item: any) => item.lang === currentLocale.value) ??
+        items.find((item: any) => item.lang === currentLocale.value.split('_')[0]) ??
+        items[0] ??
+        {}
+    );
+});
+
+const locationNames = computed(() => {
+    return (props.person?.locations ?? [])
+        .map((location: any) => {
+            const locTranslation = (location.translations ?? []).find(
+                (item: any) => item.lang === currentLocale.value || item.lang === currentLocale.value.split('_')[0],
+            ) ?? (location.translations ?? [])[0];
+
+            return locTranslation?.name ?? location.name ?? null;
+        })
+        .filter(Boolean)
+        .join(', ');
+});
+
+const personTitle = computed(() => translation.value?.name ?? props.person?.name ?? 'Saint');
+const personDescription = computed(() => translation.value?.description ?? '');
+const textSections = computed(() => props.person?.texts ?? []);
+
+const escapeAttr = (value: any) => {
+    return String(value ?? '')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '')
+        .replace(/>/g, '')
+        .trim();
+};
+
+const formatSectionHtml = (section: any) => {
+    const base = section?.text ?? '';
+    const raw = section?.info_source ?? null;
+
+    let sources: string[] = [];
+    if (Array.isArray(raw)) {
+        sources = raw.map((s: any) => String(s).trim()).filter(Boolean);
+    } else if (typeof raw === 'string' && raw.trim()) {
+        sources = raw.split(/[,;\n]+/).map((s: string) => s.trim()).filter(Boolean);
+    }
+
+    if (!sources.length) return base;
+
+    const sourceLabel = trans('source');
+
+    const links = sources
+        .map((s: string, idx: number) => {
+            const href = escapeAttr(s);
+            return `<a href="${href}" target="_blank" rel="noopener noreferrer">[${sourceLabel}: ${href}]</a>`;
+        })
+        .join(' ');
+
+    return `${base} ${links}`;
+};
+</script>
+
+<template>
+    <Head :title="personTitle" />
+
+    <div class="flex min-h-screen flex-col bg-[#dddddd] p-6 text-[#111111] dark:bg-[#000000] dark:text-[#ffffff] lg:p-8">
+        <WebsiteHeader />
+
+        <main class="mx-auto w-full max-w-[1800px]">
+            <article class="overflow-hidden rounded bg-white shadow dark:bg-[#111111]">
+                <div v-if="props.person?.intro_image_url" class="border-b border-gray-200 bg-gray-100 dark:border-gray-700 dark:bg-[#0c0c0c]">
+                    <img :src="props.person.intro_image_url" :alt="personTitle" class="h-[320px] w-full object-cover" />
+                </div>
+
+                <div class="space-y-6 p-6 md:p-8">
+                    <div class="space-y-3">
+                        <h1 class="text-3xl font-bold md:text-5xl">{{ personTitle }}</h1>
+                        <div v-if="props.person?.beatified_at" class="text-sm text-gray-600 dark:text-gray-400">
+                            {{ props.person.beatified_at }}
+                        </div>
+                        <div v-if="locationNames" class="text-sm text-gray-700 dark:text-gray-300">
+                            {{ locationNames }}
+                        </div>
+                    </div>
+
+                    <div
+                        v-if="personDescription"
+                        class="prose prose-sm max-w-none leading-relaxed text-gray-700 dark:prose-invert dark:text-gray-200"
+                        v-html="personDescription"
+                    />
+
+                    <div v-if="textSections.length" class="space-y-8">
+                        <section v-for="section in textSections" :key="section.id" class="space-y-3">
+                            <h2 v-if="section.title" class="text-2xl font-semibold">{{ section.title }}</h2>
+
+                            <img :src="section.image_url" :alt="section.image_alt || section.title || personTitle" class="max-w-[300px] object-cover float-left mr-3 mb-3" v-if="section.image_url" />
+
+                            <div
+                                v-if="section.text"
+                                class="prose prose-sm max-w-none leading-relaxed text-gray-700 dark:prose-invert dark:text-gray-200"
+                                v-html="formatSectionHtml(section)"
+                            />
+                            <div class="clear-both"></div>
+                        </section>
+                    </div>
+                </div>
+            </article>
+        </main>
+    </div>
+</template>
