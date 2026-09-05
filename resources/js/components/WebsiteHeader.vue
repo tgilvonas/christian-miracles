@@ -34,7 +34,8 @@ const saintsLabel = computed(() => trans('saints'));
                     <Link :href="saintsLink" class="font-medium text-gray-700 dark:text-gray-200">{{ saintsLabel }}</Link>
                 </div>
 
-                <div class="ml-4">
+                <div class="ml-4 flex items-center gap-2">
+                    <span class="font-medium text-gray-700 dark:text-gray-200">{{ trans('language') }}</span>
                     <LocaleSwitcher :locales="locales" :currentLocale="currentLocaleValue" />
                 </div>
             </div>

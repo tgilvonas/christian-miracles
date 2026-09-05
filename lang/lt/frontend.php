@@ -7,4 +7,5 @@ return [
     'clear' => 'Išvalyti',
     'saints' => 'Šventieji',
     'miracles' => 'Stebuklai',
+    'language' => 'Kalba',
 ];
