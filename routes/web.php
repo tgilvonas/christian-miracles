@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LocationsController;
 use App\Http\Controllers\Admin\MiraclesController;
 use App\Http\Controllers\Admin\PersonsController;
+use App\Http\Controllers\Admin\SocialStatusesController;
 use App\Http\Controllers\Admin\UsersController;
 use App\Http\Controllers\Frontend\MiraclesController as FrontendMiraclesController;
 use App\Http\Controllers\Frontend\SaintsController as FrontendSaintsController;
@@ -34,6 +35,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/locations/{locationId?}', [LocationsController::class, 'save'])->name('admin.locations.save');
     Route::get('/admin/locations/{locationId}/edit', [LocationsController::class, 'edit'])->name('admin.locations.edit');
     Route::delete('/admin/locations/{locationId}', [LocationsController::class, 'delete'])->name('admin.locations.delete');
+
+    Route::get('/admin/social-statuses', [SocialStatusesController::class, 'index'])->name('admin.social_statuses.index');
+    Route::get('/admin/social-statuses/json-list', [SocialStatusesController::class, 'getJsonList'])->name('admin.social_statuses.json_list');
+    Route::get('/admin/social-statuses/create', [SocialStatusesController::class, 'create'])->name('admin.social_statuses.create');
+    Route::post('/admin/social-statuses/{socialStatusId?}', [SocialStatusesController::class, 'save'])->name('admin.social_statuses.save');
+    Route::get('/admin/social-statuses/{socialStatusId}/edit', [SocialStatusesController::class, 'edit'])->name('admin.social_statuses.edit');
+    Route::delete('/admin/social-statuses/{socialStatusId}', [SocialStatusesController::class, 'delete'])->name('admin.social_statuses.delete');
 
     Route::get('/admin/miracles', [MiraclesController::class, 'index'])->name('admin.miracles.index');
     Route::get('/admin/miracles/json-list', [MiraclesController::class, 'getJsonList'])->name('admin.miracles.json_list');

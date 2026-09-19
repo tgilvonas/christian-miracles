@@ -33,6 +33,11 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
+        title: trans('social_statuses'),
+        href: route('admin.social_statuses.index'),
+        icon: LayoutGrid,
+    },
+    {
         title: trans('persons'),
         href: route('admin.persons.index'),
         icon: Users,

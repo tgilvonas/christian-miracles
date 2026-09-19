@@ -7,6 +7,8 @@ return [
     'dashboard' => 'Statistikos skydas',
     'locations' => 'Vietovės',
     'location' => 'Vietovė',
+    'social_statuses' => 'Socialiniai statusai',
+    'social_status' => 'Socialinis statusas',
     'save' => 'Išsaugoti',
     'close' => 'Uždaryti',
     'title' => 'Pavadinimas',

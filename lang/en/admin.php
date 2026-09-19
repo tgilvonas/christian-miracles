@@ -7,6 +7,8 @@ return [
     'dashboard' => 'Dashboard',
     'locations' => 'Locations',
     'location' => 'Location',
+    'social_statuses' => 'Social statuses',
+    'social_status' => 'Social status',
     'save' => 'Save',
     'close' => 'Close',
     'title' => 'Title',
