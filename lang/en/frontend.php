@@ -7,5 +7,4 @@ return [
     'clear' => 'Clear',
     'saints' => 'Saints',
     'miracles' => 'Miracles',
-    'language' => 'Language',
 ];

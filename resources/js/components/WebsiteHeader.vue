@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
+import { Globe } from 'lucide-vue-next';
 import { computed } from 'vue';
 import { route } from 'ziggy-js';
 import { trans } from '@/helpers/translator';
@@ -35,7 +36,9 @@ const saintsLabel = computed(() => trans('saints'));
                 </div>
 
                 <div class="ml-4 flex items-center gap-2">
-                    <span class="font-medium text-gray-700 dark:text-gray-200">{{ trans('language') }}</span>
+                    <span aria-label="Language selector" class="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 bg-white text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                        <Globe class="h-4 w-4" />
+                    </span>
                     <LocaleSwitcher :locales="locales" :currentLocale="currentLocaleValue" />
                 </div>
             </div>
