@@ -66,17 +66,17 @@ watch([search, selectedLocation, selectedSocialStatus], () => {
         <div class="flex w-full items-center justify-center">
             <main class="w-full max-w-[1800px] mx-auto">
                 <div class="mb-4">
-                    <div class="flex gap-2">
+                    <div class="flex flex-wrap gap-2">
                         <input
                             v-model="search"
                             type="search"
                             :placeholder="trans('search')"
-                            class="w-full rounded border px-3 py-2 bg-white text-gray-900 placeholder-gray-500 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 dark:bg-[#0b0b0b] dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-blue-600"
+                            class="w-full min-w-[220px] flex-1 rounded border px-3 py-2 bg-white text-gray-900 placeholder-gray-500 border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 dark:bg-[#0b0b0b] dark:text-gray-100 dark:placeholder-gray-400 dark:border-gray-700 dark:focus:ring-blue-600 sm:w-auto"
                         />
 
                         <select
                             v-model="selectedLocation"
-                            class="rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700"
+                            class="w-full min-w-[180px] flex-1 rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700 sm:w-auto"
                         >
                             <option :value="null">{{ trans('all_locations') }}</option>
                             <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
@@ -84,7 +84,7 @@ watch([search, selectedLocation, selectedSocialStatus], () => {
 
                         <select
                             v-model="selectedSocialStatus"
-                            class="rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700"
+                            class="w-full min-w-[180px] flex-1 rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700 sm:w-auto"
                         >
                             <option :value="null">{{ trans('all_social_statuses') }}</option>
                             <option v-for="status in socialStatuses" :key="status.id" :value="status.id">{{ status.name }}</option>
@@ -93,7 +93,7 @@ watch([search, selectedLocation, selectedSocialStatus], () => {
                         <button
                             v-if="(search || selectedLocation || selectedSocialStatus)"
                             @click="(search=''), (selectedLocation=null), (selectedSocialStatus=null), fetchPersons()"
-                            class="rounded px-3 bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 hover:dark:bg-gray-700"
+                            class="w-full rounded px-3 py-2 bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 hover:dark:bg-gray-700 sm:w-auto"
                         >
                             {{ trans('clear') }}
                         </button>
