@@ -19,8 +19,9 @@ class SaintsController extends Controller
     {
         $q = $request->query('q');
         $locationId = $request->query('location_id');
+        $socialStatusId = $request->query('social_status_id');
 
-        $persons = PersonsRepository::getFilteredList($q, $locationId);
+        $persons = PersonsRepository::getFilteredList($q, $locationId, $socialStatusId);
 
         $locations = collect($persons)
             ->flatMap(function ($p) {
@@ -35,9 +36,23 @@ class SaintsController extends Controller
                 ];
             });
 
+        $socialStatuses = collect($persons)
+            ->flatMap(function ($p) {
+                return $p['social_statuses'] ?? [];
+            })
+            ->unique('id')
+            ->values()
+            ->map(function ($status) {
+                return [
+                    'id' => $status['id'],
+                    'name' => $status['name'] ?? null,
+                ];
+            });
+
         return response()->json([
             'persons' => $persons,
             'locations' => $locations,
+            'social_statuses' => $socialStatuses,
         ]);
     }
 

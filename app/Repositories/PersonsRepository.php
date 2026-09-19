@@ -6,16 +6,22 @@ use App\Models\Person;
 
 class PersonsRepository
 {
-    public static function getFilteredList($search = null, $locationId = null)
+    public static function getFilteredList($search = null, $locationId = null, $socialStatusId = null)
     {
         $locale = app()->getLocale();
 
-        $builder = Person::with(['translations', 'texts', 'locations.translations', 'media'])
+        $builder = Person::with(['translations', 'texts', 'locations.translations', 'socialStatuses.translations', 'media'])
             ->where('published', 1);
 
         if (!empty($locationId)) {
             $builder->whereHas('locations', function ($q) use ($locationId) {
                 $q->where('id', $locationId);
+            });
+        }
+
+        if (!empty($socialStatusId)) {
+            $builder->whereHas('socialStatuses', function ($q) use ($socialStatusId) {
+                $q->where('id', $socialStatusId);
             });
         }
 
@@ -48,6 +54,14 @@ class PersonsRepository
                             'id' => $loc->id,
                             'name' => $lt->name ?? null,
                             'slug' => $lt->slug ?? null,
+                        ];
+                    })->values(),
+                    'social_statuses' => $p->socialStatuses->map(function ($socialStatus) use ($locale) {
+                        $translation = $socialStatus->translations->firstWhere('lang', $locale) ?: $socialStatus->translations->first();
+                        return [
+                            'id' => $socialStatus->id,
+                            'name' => $translation->name ?? $socialStatus->name,
+                            'slug' => $translation->slug ?? null,
                         ];
                     })->values(),
                 ];

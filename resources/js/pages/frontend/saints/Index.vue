@@ -8,8 +8,10 @@ import { trans } from '@/helpers/translator';
 const page = usePage();
 const persons = ref<any[]>([]);
 const locations = ref<any[]>([]);
+const socialStatuses = ref<any[]>([]);
 const search = ref<string>('');
 const selectedLocation = ref<string | number | null>(null);
+const selectedSocialStatus = ref<string | number | null>(null);
 const loading = ref<boolean>(false);
 
 const currentLocale = computed(() => String(page.props.currentLocale ?? 'en').toLowerCase());
@@ -32,6 +34,7 @@ const fetchPersons = async () => {
         const params = new URLSearchParams();
         if (search.value) params.append('q', String(search.value));
         if (selectedLocation.value) params.append('location_id', String(selectedLocation.value));
+        if (selectedSocialStatus.value) params.append('social_status_id', String(selectedSocialStatus.value));
 
         const url = '/saints/json' + (params.toString() ? `?${params.toString()}` : '');
         const res = await fetch(url);
@@ -39,6 +42,7 @@ const fetchPersons = async () => {
             const data = await res.json();
             persons.value = data.persons ?? data;
             if (data.locations) locations.value = data.locations;
+            if (data.social_statuses) socialStatuses.value = data.social_statuses;
         }
     } catch (e) {
         // ignore for now
@@ -48,7 +52,7 @@ const fetchPersons = async () => {
 
 onMounted(fetchPersons);
 
-watch([search, selectedLocation], () => {
+watch([search, selectedLocation, selectedSocialStatus], () => {
     if (fetchTimer) window.clearTimeout(fetchTimer);
     // debounce
     // @ts-ignore -- browser timeout id
@@ -78,9 +82,17 @@ watch([search, selectedLocation], () => {
                             <option v-for="loc in locations" :key="loc.id" :value="loc.id">{{ loc.name }}</option>
                         </select>
 
+                        <select
+                            v-model="selectedSocialStatus"
+                            class="rounded border px-3 py-2 bg-white text-gray-900 border-gray-300 dark:bg-[#0b0b0b] dark:text-gray-100 dark:border-gray-700"
+                        >
+                            <option :value="null">{{ trans('all_social_statuses') }}</option>
+                            <option v-for="status in socialStatuses" :key="status.id" :value="status.id">{{ status.name }}</option>
+                        </select>
+
                         <button
-                            v-if="(search || selectedLocation)"
-                            @click="(search=''), (selectedLocation=null), fetchPersons()"
+                            v-if="(search || selectedLocation || selectedSocialStatus)"
+                            @click="(search=''), (selectedLocation=null), (selectedSocialStatus=null), fetchPersons()"
                             class="rounded px-3 bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-100 hover:dark:bg-gray-700"
                         >
                             {{ trans('clear') }}
