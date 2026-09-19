@@ -109,6 +109,60 @@ class PersonCrudTest extends TestCase
         ]);
     }
 
+    public function test_it_assigns_multiple_social_statuses_to_a_person(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $socialStatusOne = \App\Models\SocialStatus::create(['name' => 'Noble']);
+        $socialStatusOne->translations()->create([
+            'lang' => 'en',
+            'name' => 'Noble',
+            'slug' => 'noble',
+        ]);
+
+        $socialStatusTwo = \App\Models\SocialStatus::create(['name' => 'Merchant']);
+        $socialStatusTwo->translations()->create([
+            'lang' => 'en',
+            'name' => 'Merchant',
+            'slug' => 'merchant',
+        ]);
+
+        $response = $this->postJson(route('admin.persons.save'), [
+            'name' => 'Status Person',
+            'published' => true,
+            'social_statuses' => [$socialStatusOne->id, $socialStatusTwo->id],
+            'translations' => [
+                'en' => [
+                    'name' => 'Status Person',
+                    'slug' => 'status-person',
+                    'meta_description' => 'Summary',
+                    'meta_keywords' => 'person, status',
+                    'biography' => 'Person biography',
+                ],
+            ],
+            'texts' => [
+                'en' => [
+                    [
+                        'lang' => 'en',
+                        'pos' => 1,
+                        'title' => 'Story',
+                        'text' => '<p>Intro text</p>',
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertOk();
+
+        $person = Person::query()->where('name', 'Status Person')->firstOrFail();
+
+        $this->assertEqualsCanonicalizing(
+            [$socialStatusOne->id, $socialStatusTwo->id],
+            $person->socialStatuses()->pluck('social_statuses.id')->all()
+        );
+    }
+
     public function test_it_uploads_and_removes_person_images(): void
     {
         Storage::fake('public');

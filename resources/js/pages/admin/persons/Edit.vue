@@ -59,6 +59,7 @@ const form = reactive({
     translations: {} as Record<string, Record<string, string>>,
     texts: {} as Record<string, Array<Record<string, any>>>,
     locations: [] as Array<number>,
+    social_statuses: [] as Array<number>,
 });
 
 function buildFormData(payload: Record<string, any>) {
@@ -174,9 +175,13 @@ function syncForm() {
         form.locations = Array.isArray(person?.locations)
             ? person.locations.map((location: Record<string, any>) => Number(location?.id ?? location?.location_id ?? 0)).filter(Boolean)
             : [];
+    form.social_statuses = Array.isArray(person?.social_statuses)
+            ? person.social_statuses.map((socialStatus: number | Record<string, any>) => Number(typeof socialStatus === 'number' ? socialStatus : (socialStatus?.id ?? socialStatus?.social_status_id ?? 0))).filter(Boolean)
+            : [];
 }
 
     const availableLocations = ref<Array<{ value: number; label: string }>>([]);
+    const availableSocialStatuses = ref<Array<{ value: number; label: string }>>([]);
 
     function getLocationLabel(location: Record<string, any>) {
         const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
@@ -209,6 +214,40 @@ function syncForm() {
             }));
         }).catch((error) => {
             console.error('Unable to load locations', error);
+        });
+    }
+
+    function getSocialStatusLabel(socialStatus: Record<string, any>) {
+        const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
+        const shortLocale = localeCode.split('_')[0];
+
+        if (socialStatus?.[`name_${localeCode}`]) {
+            return socialStatus[`name_${localeCode}`];
+        }
+
+        if (socialStatus?.[`name_${shortLocale}`]) {
+            return socialStatus[`name_${shortLocale}`];
+        }
+
+        if (socialStatus?.name) {
+            return socialStatus.name;
+        }
+
+        return `Social status #${socialStatus?.id ?? '-'}`;
+    }
+
+    function loadSocialStatuses() {
+        axios.get(route('admin.social_statuses.json_list'), {
+            params: {
+                paginate_by: 9999,
+            },
+        }).then((response) => {
+            availableSocialStatuses.value = (response.data?.data ?? response.data ?? []).map((socialStatus: Record<string, any>) => ({
+                value: Number(socialStatus.id),
+                label: getSocialStatusLabel(socialStatus),
+            }));
+        }).catch((error) => {
+            console.error('Unable to load social statuses', error);
         });
     }
 
@@ -363,6 +402,7 @@ onMounted(() => {
         localStorage.removeItem('inertia_flash_success');
     }
     loadLocations();
+    loadSocialStatuses();
 });
 
 function submit() {
@@ -504,6 +544,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                                     v-model="form.locations"
                                     :options="availableLocations"
                                     :placeholder="trans('select_locations')"
+                                />
+                            </div>
+
+                            <div class="mt-4">
+                                <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                    {{ trans('social_statuses') }}
+                                </label>
+                                <VueSelect
+                                    v-model="form.social_statuses"
+                                    :options="availableSocialStatuses"
+                                    :placeholder="trans('social_statuses')"
                                 />
                             </div>
                         </div>

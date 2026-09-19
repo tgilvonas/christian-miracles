@@ -55,6 +55,7 @@ class PersonsController extends Controller
             $person->translations = [];
             $person->texts = [];
             $person->locations = [];
+            $person->social_statuses = [];
         }
 
         return Inertia::render('admin/persons/Edit', [
@@ -177,6 +178,9 @@ class PersonsController extends Controller
 
             $locationIds = array_values(array_filter(array_map('intval', (array) $request->input('locations', []))));
             $person->locations()->sync($locationIds);
+
+            $socialStatusIds = array_values(array_filter(array_map('intval', (array) $request->input('social_statuses', []))));
+            $person->socialStatuses()->sync($socialStatusIds);
 
             return $person;
         });
