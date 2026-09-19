@@ -27,15 +27,20 @@ class LocationsRepository
         
         foreach ($tableAliases as $tableAlias) {
             $queryObject->leftJoin('locations_translations AS ' . $tableAlias, function ($join) use ($tableAlias) {
+                $localeCode = strtolower(str_replace('translations_', '', $tableAlias));
+
                 $join->on('locations.id', '=', $tableAlias . '.location_id')
-                    ->where($tableAlias . '.lang', '=', strtoupper(str_replace('translations_', '', $tableAlias)));
+                    ->where($tableAlias . '.lang', '=', $localeCode);
             });
         }
 
-        if (strlen($searchText)>2) {
-            foreach ($locales as $locale) {
-                $queryObject->orWhere('name_' . strtolower($locale), 'LIKE', '%' . $searchText . '%');
-            }
+        if (strlen($searchText) > 2) {
+            $queryObject->where(function ($searchQuery) use ($locales, $searchText) {
+                foreach ($locales as $locale) {
+                    $tableAlias = 'translations_' . $locale;
+                    $searchQuery->orWhere($tableAlias . '.name', 'LIKE', '%' . $searchText . '%');
+                }
+            });
         }
 
         $queryObject->orderBy('name_' . strtolower($currentLocale));

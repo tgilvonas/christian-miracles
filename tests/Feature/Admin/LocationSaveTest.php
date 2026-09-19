@@ -11,6 +11,35 @@ class LocationSaveTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_it_filters_locations_by_translated_name(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $location = Location::create(['name' => 'Paris']);
+        $location->translations()->create([
+            'lang' => 'en',
+            'name' => 'Paris',
+            'slug' => 'paris',
+        ]);
+
+        $otherLocation = Location::create(['name' => 'Rome']);
+        $otherLocation->translations()->create([
+            'lang' => 'en',
+            'name' => 'Rome',
+            'slug' => 'rome',
+        ]);
+
+        $response = $this->getJson(route('admin.locations.json_list', [
+            'search_text' => 'Par',
+            'paginate_by' => 10,
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.id', $location->id);
+    }
+
     public function test_it_creates_and_updates_translations_without_duplicates(): void
     {
         $user = User::factory()->create();

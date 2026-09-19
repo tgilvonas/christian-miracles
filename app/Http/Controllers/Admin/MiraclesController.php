@@ -23,8 +23,15 @@ class MiraclesController extends Controller
         $query = Miracle::with('translations')->orderByDesc('id');
 
         if ($searchText = request('search_text')) {
-            $query->whereHas('translations', function ($subQuery) use ($searchText) {
-                $subQuery->where('name', 'like', '%' . $searchText . '%');
+            $query->where(function ($searchQuery) use ($searchText) {
+                $searchQuery->whereHas('translations', function ($subQuery) use ($searchText) {
+                    $subQuery->where('name', 'like', '%' . $searchText . '%');
+                });
+                $searchQuery->orWhereHas('texts', function ($textQuery) use ($searchText) {
+                    $textQuery->where('title', 'like', '%' . $searchText . '%')
+                        ->orWhere('text', 'like', '%' . $searchText . '%')
+                        ->orWhere('info_source', 'like', '%' . $searchText . '%');
+                });
             });
         }
 

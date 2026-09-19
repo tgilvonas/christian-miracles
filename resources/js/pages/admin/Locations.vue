@@ -56,6 +56,7 @@ function getLocations(page: number = 1) {
         params: {
             paginate_by: 10,
             page,
+            search_text: searchText.value,
         }
     }).then(function(response) {
         locations.value = response.data?.data || [];
@@ -65,6 +66,15 @@ function getLocations(page: number = 1) {
     }).finally(function() {
         loading.value = false;
     });
+}
+
+function searchLocations() {
+    getLocations(1);
+}
+
+function clearLocationsSearch() {
+    searchText.value = '';
+    getLocations(1);
 }
 
 function getLocationValue(record: Record<string, any>, prefix: string) {
@@ -105,9 +115,27 @@ function openCreateLocationModal() {
                 </template>
             </Modal>
 
-            <Button @click="openCreateLocationModal" color="green">
-                {{ trans('create_new') }}
-            </Button>
+            <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <Button @click="openCreateLocationModal" color="green">
+                    {{ trans('create_new') }}
+                </Button>
+
+                <div class="flex w-full max-w-md items-center gap-2">
+                    <input
+                        v-model="searchText"
+                        type="text"
+                        :placeholder="trans('search')"
+                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                        @keyup.enter="searchLocations"
+                    />
+                    <Button type="button" color="blue" @click="searchLocations">
+                        {{ trans('search') }}
+                    </Button>
+                    <Button v-if="searchText" type="button" color="gray" @click="clearLocationsSearch">
+                        {{ trans('clear') }}
+                    </Button>
+                </div>
+            </div>
 
             <div class="mt-6">
                 <div v-if="loading" class="text-sm text-gray-500">
