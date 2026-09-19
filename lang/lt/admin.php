@@ -51,4 +51,7 @@ return [
     'persons_name' => 'Vardas',
     'beatified_at' => 'Palaimintas',
     'canonized_at' => 'Paskelbtas šventuoju',
+    'all_social_statuses' => 'Visi socialiniai statusai',
+    'all_locations' => 'Visos vietovės',
+    'clear' => 'Išvalyti',
 ];

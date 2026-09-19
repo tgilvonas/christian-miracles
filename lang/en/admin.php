@@ -51,4 +51,7 @@ return [
     'persons_name' => 'Name',
     'beatified_at' => 'Beatified at',
     'canonized_at' => 'Canonized at',
+    'all_social_statuses' => 'All social statuses',
+    'all_locations' => 'All locations',
+    'clear' => 'Clear',
 ];

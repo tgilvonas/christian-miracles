@@ -33,6 +33,97 @@ class PersonCrudTest extends TestCase
         $response->assertJsonPath('data.0.name', 'List Person');
     }
 
+    public function test_it_filters_persons_by_location_and_social_status(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $locationOne = \App\Models\Location::create(['name' => 'Rome']);
+        $locationOne->translations()->create([
+            'lang' => 'en',
+            'name' => 'Rome',
+            'slug' => 'rome',
+        ]);
+
+        $locationTwo = \App\Models\Location::create(['name' => 'Jerusalem']);
+        $locationTwo->translations()->create([
+            'lang' => 'en',
+            'name' => 'Jerusalem',
+            'slug' => 'jerusalem',
+        ]);
+
+        $socialStatusOne = \App\Models\SocialStatus::create(['name' => 'Martyr']);
+        $socialStatusOne->translations()->create([
+            'lang' => 'en',
+            'name' => 'Martyr',
+            'slug' => 'martyr',
+        ]);
+
+        $socialStatusTwo = \App\Models\SocialStatus::create(['name' => 'Bishop']);
+        $socialStatusTwo->translations()->create([
+            'lang' => 'en',
+            'name' => 'Bishop',
+            'slug' => 'bishop',
+        ]);
+
+        $matchingPerson = Person::create(['name' => 'Saint Rome', 'published' => 1]);
+        $matchingPerson->locations()->sync([$locationOne->id]);
+        $matchingPerson->socialStatuses()->sync([$socialStatusOne->id]);
+
+        $otherPerson = Person::create(['name' => 'Saint Jerusalem', 'published' => 1]);
+        $otherPerson->locations()->sync([$locationTwo->id]);
+        $otherPerson->socialStatuses()->sync([$socialStatusTwo->id]);
+
+        $response = $this->getJson(route('admin.persons.json_list', [
+            'location_id' => $locationOne->id,
+            'social_status_id' => $socialStatusOne->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.id', $matchingPerson->id);
+    }
+
+    public function test_it_searches_persons_by_text_content(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $matchingPerson = Person::create([
+            'name' => 'Text Search Person',
+            'published' => 1,
+        ]);
+
+        $matchingPerson->texts()->create([
+            'lang' => 'en',
+            'pos' => 1,
+            'title' => 'Hidden search phrase',
+            'text' => 'This paragraph contains the secret keyword for searching.',
+            'info_source' => 'Source text',
+        ]);
+
+        $otherPerson = Person::create([
+            'name' => 'Unrelated Person',
+            'published' => 1,
+        ]);
+
+        $otherPerson->texts()->create([
+            'lang' => 'en',
+            'pos' => 1,
+            'title' => 'Other topic',
+            'text' => 'Nothing relevant here.',
+            'info_source' => 'Other source',
+        ]);
+
+        $response = $this->getJson(route('admin.persons.json_list', [
+            'search_text' => 'secret keyword',
+        ]));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.id', $matchingPerson->id);
+    }
+
     public function test_it_can_create_and_delete_a_person(): void
     {
         $user = User::factory()->create();

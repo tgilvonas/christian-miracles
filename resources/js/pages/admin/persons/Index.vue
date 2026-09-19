@@ -29,6 +29,71 @@ const loading = ref(false);
 const persons = ref<any[]>([]);
 const pagination = ref<any>(null);
 const searchText = ref('');
+const locations = ref<any[]>([]);
+const socialStatuses = ref<any[]>([]);
+const selectedLocationId = ref<number | string | null>(null);
+const selectedSocialStatusId = ref<number | string | null>(null);
+
+function getLocationLabel(location: Record<string, any>) {
+    const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
+    const shortLocale = localeCode.split('_')[0];
+
+    if (location?.[`name_${localeCode}`]) {
+        return location[`name_${localeCode}`];
+    }
+
+    if (location?.[`name_${shortLocale}`]) {
+        return location[`name_${shortLocale}`];
+    }
+
+    if (location?.name) {
+        return location.name;
+    }
+
+    return `Location #${location?.id ?? '-'}`;
+}
+
+function getSocialStatusLabel(socialStatus: Record<string, any>) {
+    const localeCode = String(page.props.currentLocale ?? 'en').toLowerCase();
+    const shortLocale = localeCode.split('_')[0];
+
+    if (socialStatus?.[`name_${localeCode}`]) {
+        return socialStatus[`name_${localeCode}`];
+    }
+
+    if (socialStatus?.[`name_${shortLocale}`]) {
+        return socialStatus[`name_${shortLocale}`];
+    }
+
+    if (socialStatus?.name) {
+        return socialStatus.name;
+    }
+
+    return `Social status #${socialStatus?.id ?? '-'}`;
+}
+
+function loadFilterOptions() {
+    Promise.all([
+        axios.get(route('admin.locations.json_list'), {
+            params: { paginate_by: 9999 },
+        }),
+        axios.get(route('admin.social_statuses.json_list'), {
+            params: { paginate_by: 9999 },
+        }),
+    ]).then(([locationsResponse, socialStatusesResponse]) => {
+        locations.value = (locationsResponse.data?.data ?? locationsResponse.data ?? []).map((location: Record<string, any>) => ({
+            id: Number(location.id),
+            name: getLocationLabel(location),
+        }));
+
+        socialStatuses.value = (socialStatusesResponse.data?.data ?? socialStatusesResponse.data ?? []).map((socialStatus: Record<string, any>) => ({
+            id: Number(socialStatus.id),
+            name: getSocialStatusLabel(socialStatus),
+        }));
+    }).catch((error) => {
+        console.error('Unable to load person filters', error);
+    });
+}
 
 function getDeleteUrl() {
     const deleteTarget = (state.modals.objectToDelete as Record<string, any>)?.objectInModal as Record<string, any> | null;
@@ -51,6 +116,8 @@ function getPersons(page: number = 1) {
             paginate_by: 10,
             page,
             search_text: searchText.value,
+            location_id: selectedLocationId.value || undefined,
+            social_status_id: selectedSocialStatusId.value || undefined,
         },
     }).then(function (response) {
         persons.value = response.data?.data || [];
@@ -66,8 +133,16 @@ function searchPersons() {
     getPersons(1);
 }
 
+function clearFilters() {
+    searchText.value = '';
+    selectedLocationId.value = null;
+    selectedSocialStatusId.value = null;
+    getPersons(1);
+}
+
 onMounted(() => {
     getPersons();
+    loadFilterOptions();
     eventBus.on('objectDeleted', refreshPersons);
 });
 
@@ -99,15 +174,42 @@ onBeforeUnmount(() => {
                     {{ trans('create_new') }}
                 </Button>
 
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
                     <input
                         v-model="searchText"
                         type="text"
                         :placeholder="trans('search')"
-                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100"
+                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 sm:w-52"
                     />
+
+                    <select
+                        v-model="selectedLocationId"
+                        @change="searchPersons"
+                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 sm:w-48"
+                    >
+                        <option :value="null">{{ trans('all_locations') }}</option>
+                        <option v-for="location in locations" :key="location.id" :value="location.id">
+                            {{ location.name }}
+                        </option>
+                    </select>
+
+                    <select
+                        v-model="selectedSocialStatusId"
+                        @change="searchPersons"
+                        class="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 sm:w-48"
+                    >
+                        <option :value="null">{{ trans('all_social_statuses') }}</option>
+                        <option v-for="socialStatus in socialStatuses" :key="socialStatus.id" :value="socialStatus.id">
+                            {{ socialStatus.name }}
+                        </option>
+                    </select>
+
                     <Button type="button" color="blue" @click="searchPersons">
                         {{ trans('search') }}
+                    </Button>
+
+                    <Button v-if="searchText || selectedLocationId || selectedSocialStatusId" type="button" color="gray" @click="clearFilters">
+                        {{ trans('clear') }}
                     </Button>
                 </div>
             </div>

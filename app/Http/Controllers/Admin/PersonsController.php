@@ -27,6 +27,23 @@ class PersonsController extends Controller
                 $searchQuery->orWhereHas('translations', function ($translationQuery) use ($searchText) {
                     $translationQuery->where('name', 'like', '%' . $searchText . '%');
                 });
+                $searchQuery->orWhereHas('texts', function ($textQuery) use ($searchText) {
+                    $textQuery->where('title', 'like', '%' . $searchText . '%')
+                        ->orWhere('text', 'like', '%' . $searchText . '%')
+                        ->orWhere('info_source', 'like', '%' . $searchText . '%');
+                });
+            });
+        }
+
+        if ($locationId = request('location_id')) {
+            $query->whereHas('locations', function ($locationQuery) use ($locationId) {
+                $locationQuery->where('locations.id', $locationId);
+            });
+        }
+
+        if ($socialStatusId = request('social_status_id')) {
+            $query->whereHas('socialStatuses', function ($socialStatusQuery) use ($socialStatusId) {
+                $socialStatusQuery->where('social_statuses.id', $socialStatusId);
             });
         }
 
